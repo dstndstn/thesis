@@ -30,7 +30,7 @@
 \begin{document}
 
 \title{\textsl{Astrometry.net}: \\
-       Blind astrometric calibration of arbitrary astronomical images}
+       astrometric calibration of arbitrary astronomical images}
 \author{Dustin~Lang\altaffilmark{1},
         David~W.~Hogg\altaffilmark{2,3},
         Keir~Mierle\altaffilmark{1,4},
@@ -144,7 +144,7 @@ observers tweak the pointing; and many telescope--instrument
 combinations output images with meta-data that are not
 standards-compliant or simply wrong.
 
-A system to automatically and blindly calibrate all astronomical
+A system to automatically calibrate all astronomical
 imaging coming off of instruments at each of the world's observatories
 could catch telescope drifts and faults in real time, potentially
 saving significant amounts of observing time and operational costs.
@@ -176,14 +176,14 @@ There is no way to find those data without reliable and
 standards-compliant astrometric meta-data.
 
 \paragraph{Prior work.}
-An early application of blind astrometric matching was for attitude
+An early application of astrometric matching was for attitude
 estimation of spacecraft: by identifying constellations, the pose of
 the camera can be determined \citep{liebe1993}.  In such systems,
 triangles (three-star asterisms) are typically used
 (e.g. \citealt{junkins1977}).  Triangles are effective in this domain
 because the images span tens of $\deg$ and contain only dozens of
 very bright stars: the search space is small.  Furthermore, these
-systems are not fully ``blind'' in that they are designed for
+systems require significant prior information, in that they are designed for
 particular cameras, the specifications of which are available to the
 system designers.
 
@@ -191,7 +191,7 @@ Triangle-based approaches have also been used to solve the astrometry
 problem when a good initial estimate is available \citep{palbakos}.
 Because the search domain is limited to a small area around the
 initial estimate, the triangle-based approach is still effective.
-Completely blind systems have been attempted previously (for example,
+Full-sky systems have been attempted previously (for example,
 \citealt{harvey} and references therein) but none we know of have been
 able to achieve the scalability and fidelity of our approach.
 
@@ -439,7 +439,7 @@ Implementation of an index that achieves these properties is made
 easier if the angular scale (angular $\starA$--$\starB$ distance)
 of all quads is
 restricted to lie within a small range (for example, a factor of
-two). Unfortunately, the very nature of the blind calibration problem
+two). Unfortunately, the very nature of the full-sky calibration problem
 means that we do not know the angular plate scale of the query image a
 priori. As a purely practical matter, we resolved this tension by
 constructing several disjoint indices, each containing quads spanning
@@ -542,7 +542,7 @@ when we find, say, 30 hits.
 
 \section{Results}
 
-\subsection{Blind astrometric calibration of the Sloan Digital Sky Survey}
+\subsection{Astrometric calibration of the Sloan Digital Sky Survey}
 
 We explored the potential for automatically organizing and annotating
 a very large real world data set by taking a sample of
@@ -613,7 +613,7 @@ attempt calibration at a wide range of scales, the only successful
 verification will occur at the correct scale.  Direct tests confirm
 this.
 
-\subsection{Blind astrometric calibration of Galaxy Evolution Explorer data}
+\subsection{Astrometric calibration of Galaxy Evolution Explorer data}
 
 % Run 132: GALEX GR2 jpegs (11076), index 500.
 
@@ -653,9 +653,9 @@ far-UV filter; the majority of the images combine near-UV and far-UV
 exposures.  We successfully calibrated $100~\percent$ of the images
 with near-UV coverage.
 
-\subsection{Blind astrometric calibration of other imagery}
+\subsection{Astrometric calibration of other imagery}
 
-We have also had excellent success using the same system for blindly
+We have also had excellent success using the same system for
 calibrating a wide class of other astronomical images including
 scanned photographic plates from the Harvard Observatory archives
 \citep{harvardplates}, amateur telescope shots spanning approximately
@@ -680,7 +680,7 @@ to find it elsewhere.
 
 We have described a system that performs astrometric
 calibration---determination of imaging pointing, orientation, and
-plate scale---blind, or without any prior information beyond the data
+plate scale---without any prior information beyond the data
 in the image pixels.  This system works by using indexed asterisms to
 generate hypotheses, followed by quantitative verification of those
 hypotheses.  The system makes it possible to vet or restore the
