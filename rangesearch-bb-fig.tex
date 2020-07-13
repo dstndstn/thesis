@@ -1,0 +1,66 @@
+\documentclass{article}
+\usepackage{tikz}
+%\usetikzlibrary{arrows,shapes,snakes,automata,matrix}
+\usetikzlibrary{arrows,shapes}
+\usepackage{helvet}
+\begin{document}
+\thispagestyle{empty}
+\begin{center}
+
+	\begin{tikzpicture}
+	  \filldraw [fill=blue!5!white, dotted] (0,-1) rectangle(9,4);
+	  \draw (4.5,4) node [anchor=south] {$N$};
+	  \filldraw [fill=blue!15!white]
+	  (0,0) rectangle(3,4)
+	  (4,-1) rectangle(9,3);
+	  %\draw (1.5,4) node[anchor=south] {$L$};
+	  %\draw (6.5,3) node[anchor=south] {$R$};
+	  \draw (0,4) node[anchor=north west] {$L$};
+	  \draw (9,3) node[anchor=north east] {$R$};
+	  \begin{scope}
+		[shift={(2,2)}]
+ 		\fill (0,0) circle (2pt);
+		\draw (0,0) circle (1.5);
+		\draw (0,0) [yshift=-2pt] node[anchor=north] {$q$};
+		\draw [dashed] (0,0) -- (2,0);
+		\begin{scope} [rotate=150]
+		  \draw [>=triangle 45,->] (0,0) -- node[anchor=south west] {$r_1$} (1.5,0);
+		\end{scope}
+		\end{scope}
+		\draw [>=triangle 45,<->] (2,-1.5) -- node[anchor=north,yshift=-2pt] {Distance to $R$'s bounding box in the splitting dimension $> r_1$} (4,-1.5);
+		\draw [shift={(2,-1.5)}] (0pt,-2pt) -- (0,2.9);
+		\draw [shift={(4,-1.5)}] (0pt,-2pt) -- (0,0.4);
+	\end{tikzpicture}
+	\\
+	\vspace{15pt}
+	\begin{tikzpicture}
+	  \filldraw [fill=blue!5!white, dotted] (0,-1) rectangle(9,4);
+	  \draw (4.5,4) node [anchor=south] {$N$};
+	  \filldraw [fill=blue!15!white]
+	  (0,0) rectangle(3,4)
+	  (4,-1) rectangle(9,3);
+	  % \fill [shift={(0,0)},gray]
+	  %(0,0.4) circle(1pt)
+	  %(3,3.4) circle(1pt)
+	  %;
+	  %\draw (1.5,4) node[anchor=south] {$L$};
+	  %\draw (6.5,3) node[anchor=south] {$R$};
+	  \draw (0,4) node[anchor=north west] {$L$};
+	  \draw (9,3) node[anchor=north east] {$R$};
+	  \begin{scope}
+		[shift={(2,2)}]
+ 		\fill (0,0) circle (2pt);
+		\draw (0,0) circle (3);
+		\draw (0,0) [yshift=-2pt] node[anchor=north] {$q$};
+		\draw [dashed] (0,0) -- (2,0);
+		\begin{scope} [rotate=150]
+		  \draw [>=triangle 45,->] (0,0) -- node[anchor=south west] {$r_2$} (3,0);
+		\end{scope}
+		\end{scope}
+		\draw [>=triangle 45,<->] (2,-1.5) -- node[anchor=north,yshift=-2pt] {Distance to $R$'s bounding box in the splitting dimension $\le r_2$} (4,-1.5);
+		\draw [shift={(2,-1.5)}] (0pt,-2pt) -- (0,2.9);
+		\draw [shift={(4,-1.5)}] (0pt,-2pt) -- (0,0.4);
+	\end{tikzpicture}
+
+\end{center}
+\end{document}

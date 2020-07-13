@@ -1,0 +1,77 @@
+\documentclass[11pt,letterpaper]{article}
+%\documentclass[10pt,twocolumn,letterpaper]{article}
+%\documentclass[10pt,twocolumn,letterpaper,draft]{article}
+
+\input{aastex_defines}
+\input{preamble}
+
+%\usepackage{fullpage}
+%\usepackage{cvpr}
+%\usepackage{times}
+%\usepackage{epsfig}
+%\usepackage{graphicx}
+%\usepackage{amsmath}
+%\usepackage{amssymb}
+%\usepackage{multirow}
+%\usepackage{xspace}
+%\usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
+
+\newcommand{\doctype}{paper\xspace}
+\newcommand{\linespacing}[1]{\renewcommand{\baselinestretch}{#1}}
+\newcommand{\numberparagraphs}{}
+\newcommand{\nonumberparagraphs}{}
+
+\graphicspath{{figs-kdtree/}}
+
+%\cvprfinalcopy
+%\def\cvprPaperID{2441}
+%\def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
+
+\begin{document}
+
+\title{\Kdtrees without the Pain, but with all the Performance}
+
+\author{Dustin Lang\\
+Department of Computer Science\\
+University of Toronto\\
+{\tt\small dstn@cs.toronto.edu}
+\and
+Keir Mierle\\
+Department of Electrical and Computer Engineering\\
+University of Toronto\\
+{\tt\small mierle@cs.toronto.edu}
+\and
+Aeron Buchanan\\
+Engineering Science Department\\
+Oxford University
+{\tt\small amb@robots.ox.ac.uk}
+}
+
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+  The \kdtree is a simple yet versatile data structure for speeding
+  up searches in $k$-dimensional data sets.  It applies to
+  nearest-neighbour queries, which arise in many computer vision
+  applications such as vector quantization and template matching.  It
+  also applies to a family of related problems such as range search
+  (finding all points within a given radius of a query), $K$-nearest
+  neighbours, and approximate kernel density estimation.  Over its
+  long history the \kdtree has accumulated many extensions and
+  variations making the literature difficult to comprehend.  This
+  paper presents a modern view of the \kdtree.  It also points out a
+  number of optimizations that can increase the performance by an
+  order of magnitude over existing publicly available implementations.  A software release implementing these
+  optimizations accompanies the paper.
+\end{abstract}
+
+\input{kdtree}
+
+{\small
+\bibliographystyle{plain}
+\bibliography{kdtree-wrapper}
+}
+
+\end{document}
+

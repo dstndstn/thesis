@@ -1,0 +1,85 @@
+\input{tikzfig}
+
+\input{tech-report-common}
+\usepackage{calc}
+
+\setpagesize{\gridfigwidth}{\gridfigwidth}
+
+\begin{document}
+\thispagestyle{empty}
+\begin{center}
+    \definecolor{fillgray}{gray}{0.7}
+  \def\scale{5}
+  \def\invscale{0.2}
+  \def\star{}
+  \def\ticklen{1pt}
+  \newlength{\gridstep}
+  \setlength{\gridstep}{1 cm/12}
+  \begin{tikzpicture}[rotate=-15, scale=\scale]
+	\tikzstyle{axes}=[]
+
+    \draw 
+	(0,0)     \star node[anchor=north east]{\starA}
+	(1,1)     \star node[anchor=south west]{\starB};
+
+
+    \fill [color=fillgray]
+     %**rects***
+    (0.916667,0.666667) rectangle +(\gridstep,\gridstep)
+(0.666667,0.833333) rectangle +(\gridstep,\gridstep)
+(0.833333,0.916667) rectangle +(\gridstep,\gridstep)
+(0.0833333,0.5) rectangle +(\gridstep,\gridstep)
+(0.333333,0.0833333) rectangle +(\gridstep,\gridstep)
+(0.0833333,0.25) rectangle +(\gridstep,\gridstep)
+(0.833333,0.333333) rectangle +(\gridstep,\gridstep)
+(0,0.75) rectangle +(\gridstep,\gridstep)
+(0.0833333,0.5) rectangle +(\gridstep,\gridstep)
+(0.25,0) rectangle +(\gridstep,\gridstep)
+
+;
+
+    \draw [step=\gridstep] (0,0) grid (1,1);
+
+    \begin{scope}[nodes={draw, thick, fill=yellow, star, star points=5, star point height=3pt, inner sep=2pt}]
+      \def\star{node{}}
+      \draw
+	  (0,0)     \star
+	  (1,1)     \star
+
+;
+    \end{scope}
+
+    \begin{scope}[nodes={draw, thick, fill=yellow, star, star points=5, star point height=2.25pt, inner sep=1.5pt}]
+      \def\star{node{}}
+      \draw
+      %	  (0.5,0.5)     \star;
+      %**stars***
+      (0.925,0.680833) \star
+(0.999167,-0.0525) \star
+(0.685,0.881667) \star
+(0.879167,0.92) \star
+(0.140833,0.545) \star
+(0.375,0.1175) \star
+(0.119167,0.255) \star
+(0.419167,1.0225) \star
+(-0.0508333,0.525833) \star
+(0.6975,-0.104167) \star
+(1.35333,1.065) \star
+(0.151667,-0.1375) \star
+(0.8375,0.39) \star
+(-0.193333,0.490833) \star
+(0.0575,0.798333) \star
+(0.155,0.536667) \star
+(1.2,0.7) \star
+(1.36083,1.00417) \star
+(1.30583,1.22417) \star
+(0.295833,0.0808333) \star
+(1.1025,0.2375) \star
+
+;
+    \end{scope}
+
+  \end{tikzpicture}
+
+\end{center}
+\end{document}

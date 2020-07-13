@@ -1,0 +1,34 @@
+\input{../tikzfig}
+\input{kdfigs-tikz}
+\setpagesize{\pointerlessfigwidth}{\pointerlessfigheight}
+
+\begin{document}%
+\thispagestyle{empty}%
+\begin{center}%
+\newcommand{\myscale}{0.8}
+\begin{tikzpicture}[>=latex, scale=\myscale]
+  %\useasboundingbox (0,-1.16) rectangle (7.4, 1.73);
+  \tikzstyle{box} = [draw, thick, minimum size=\myscale cm]
+  \begin{scope} [xshift=0.5cm, yshift=0.5cm]
+    \draw (0,0) node (N0) [box] {0};
+  \end{scope}
+  \begin{scope} [xshift=1.7cm, yshift=0.5cm]
+    \draw (0,0) node (N1) [box] {1};
+    \draw (1,0) node (N2) [box] {2};
+  \end{scope}
+  \begin{scope} [xshift=3.9cm, yshift=0.5cm]
+    \draw (0,0) node (N3) [box] {3};
+    \draw (1,0) node (N4) [box] {4};
+    \draw (2,0) node (N5) [box] {5};
+    \draw (3,0) node (N6) [box] {6};
+  \end{scope}
+  \draw [->, thick] (N0.north) to [bend left=65] (N1.north);
+  \draw [->, thick] (N0.north) to [bend left=65] (N2.north);
+  \draw [->, thick] (N1.south) to [bend right=65] (N3.south);
+  \draw [->, thick] (N1.south) to [bend right=65] (N4.south);
+  \draw [->, thick] (N2.south) to [bend right=65] (N5.south);
+  \draw [->, thick] (N2.south) to [bend right=65] (N6.south);
+%  \draw (current bounding box.south west) rectangle (current bounding box.north east);
+\end{tikzpicture}%
+\end{center}%
+\end{document}

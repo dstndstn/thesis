@@ -1,0 +1,39 @@
+%\documentclass[letterpaper,draft]{article}
+\documentclass[letterpaper]{article}
+
+\newcommand{\doctype}{note}
+
+\newcommand{\numberparagraphs}{}
+\newcommand{\nonumberparagraphs}{}
+%\usepackage{mparhack}
+%\usepackage{numberparagraphs}
+% Small margins
+%\let\oldmarginpar\marginpar
+%\renewcommand\marginpar[1]{\-\oldmarginpar{\footnotesize #1}}
+%% Put the margin notes on the left-hand margin.
+%\reversemarginpar
+
+\input{aastex_defines}
+\input{preamble}
+
+\graphicspath{{figs-verify/}}
+
+\title{Verifying a hypothesized astrometric alignment between two lists of stars}
+\author{Dustin~Lang, David~W.~Hogg}
+\date{2009-05-29}
+\begin{document}
+\maketitle
+
+\input{verify}
+
+\paragraph{Acknowledgements}
+It is a great pleasure to thank Iain Murray for many helpful
+discussions.
+
+{\small
+  \bibliographystyle{plain}
+  \bibliography{verify-wrapper}
+}
+
+\end{document}
+

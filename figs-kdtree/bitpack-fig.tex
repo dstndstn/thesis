@@ -1,0 +1,41 @@
+\input{../tikzfig}
+\input{kdfigs-tikz}
+\setpagesize{\bitpackfigwidth}{\bitpackfigheight}
+\usepackage{calc}
+\begin{document}%
+\thispagestyle{empty}%
+\begin{center}%
+\newcommand{\myscale}{0.8}
+\newlength{\mylen}
+\setlength{\mylen}{\myscale cm}
+
+\newlength{\ublen}
+\setlength{\ublen}{\mylen * \real{6.2}}
+
+\begin{tikzpicture}[scale=\myscale, >=latex]
+  \tikzstyle{box} = [draw, thick, minimum size=\mylen, inner sep=0, anchor=north west]
+  \tikzstyle{lab} = [anchor=east]
+
+  \tikzstyle{brace} = [anchor=south west, inner sep=0]
+  \tikzstyle{lev}   = [anchor=south, inner sep=0]
+
+  \tikzstyle{plusone} = [anchor=west,pos=0.4, font=\footnotesize]
+
+  \draw (0,0) node (N15) [box] {15};
+  \draw (1,0) node     [box, minimum width=2\mylen] {\ldots};
+  \draw (3,0) node (N2)  [box] {2};
+  \draw (4.2,0) node (N1)  [box] {1};
+  \draw (5.2,0) node (N0)  [box] {0};
+
+  \draw (0,0) node (OB15) [brace] {$\overbrace{\rule{4\mylen}{0pt}}$};
+  \draw (4.2,0) node (OB10) [brace] {$\overbrace{\rule{2\mylen}{0pt}}$};
+
+  \node [above of=OB15, node distance=0.7em, anchor=mid] {split position};
+  \node [above of=OB10, node distance=0.7em, anchor=mid] {dimension};
+
+  \draw (0,-1.1) node (UB) [brace, anchor=north west] {$\underbrace{\rule{\ublen}{0pt}}$};
+  \node [below of=UB, node distance=0.7em, anchor=mid] {{\tt uint16}};
+
+\end{tikzpicture}%
+\end{center}%
+\end{document}

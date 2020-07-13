@@ -1,0 +1,199 @@
+\documentclass[letterpaper]{ut-thesis}
+% twoside
+%\documentclass[draft,12pt]{ut-thesis}
+
+
+\usepackage{mparhack}
+\usepackage{numberparagraphs}
+\usepackage{svn}
+% don't indent footnotes.
+\usepackage[hang,flushmargin]{footmisc}
+
+%\newcommand{\numberparagraphs}{}
+%\newcommand{\nonumberparagraphs}{}
+
+\SVN $Revision: 13655 $
+\SVN $Date: 2009-11-17 13:39:31 -0500 (Tue, 17 Nov 2009) $
+
+% Small margins
+\let\oldmarginpar\marginpar
+\renewcommand\marginpar[1]{\-\oldmarginpar{\footnotesize #1}}
+% Put the margin notes on the left-hand margin.
+\reversemarginpar
+
+\newcommand{\doctype}{chapter\xspace}
+\newcommand{\thesisonly}[1]{#1}
+\newcommand{\notthesisonly}[1]{}
+
+\input{aastex_defines}
+\input{preamble}
+
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{2}
+
+\newcommand{\mytitle}{\an: Automatic recognition and calibration of astronomical images}
+\newcommand{\myauthor}{Dustin Lang}
+
+\degree{Doctor of Philosophy}
+\department{Computer Science}
+\gradyear{2009}
+\author{\myauthor}
+\title{\mytitle}
+\titlepagefootnote{\noindent This is Subversion revision \SVNRevision\ in the \an repository, dated \SVNDate\ at \SVNTime.}
+
+\hypersetup{
+  pdftitle={\mytitle},
+  pdfauthor={\myauthor},
+  pdfsubject={Astrometry.net.  This is SVN revision \SVNRevision, dated \SVNDate\ at \SVNTime.},
+  pdfkeywords={Astrometry, Astrometry.net, Geometric hashing, Kd-tree, kdtree},
+  letterpaper=true,
+  setpagesize=true,
+}
+
+\sloppy
+
+\begin{document}
+
+\begin{preliminary}
+\maketitle
+
+%% (At most 150 words for M.Sc. or 350 words for Ph.D.)
+\begin{abstract}
+We present \an, a system for automatically recognizing and
+astrometrically calibrating astronomical images, using the information
+in the image pixels alone.  The system is based on the \emph{geometric
+  hashing} approach in computer vision: We use the geometric
+relationships between low-level features (stars and galaxies), which
+are relatively indistinctive, to create geometric features that are
+distinctive enough that we can recognize images that cover less than
+one-millionth of the area of the sky.  The geometric features are used
+to generate rapidly hypotheses about the location---the pointing,
+scale, and rotation---of an image on the sky.  Each hypothesis is then
+evaluated in a Bayesian decision theory framework in order to ensure
+that most correct hypotheses are accepted while false hypotheses are
+almost never accepted.  The feature-matching process is
+accelerated by using a new fast and space-efficient \kdtree
+implementation.  The \an system is available via a web interface, and
+the software is released under an open-source license.  It is being
+used by hundreds of individual astronomers and several large-scale
+projects, so we have at least partially achieved our goal of helping
+``to organize, annotate and make searchable all the world's
+astronomical information.''
+\end{abstract}
+
+\begin{acknowledgements}
+
+First, I want to thank Sam Roweis for accepting me as his student, for
+handing me the nascent \an project which has been so fun to work on,
+for providing help, support, and encouragement throughout, and, most
+importantly, for his warm friendship.
+
+
+I owe huge thanks to David Hogg, for serving as my semi-official
+co-supervisor, mentor, and guide to the world of astronomy.  It is
+hard to imagine what my life would be like if I hadn't met him: no
+Delion-fuelled hack sessions in New York, no lovely summers in
+Heidelberg, and I almost certainly would not have made the jump into
+astronomy.  He has shown me a great deal about how to be a good
+scientist and how to love my job and love my family at the same time.
+It has been a great privilege working with him.
+
+
+I have been fortunate to work with a number of great people on the \an
+team, in particular Keir Mierle, who taught me many things about the
+practice of software development, and Christopher Stumm, who has done
+excellent work in bringing \an to the amateur astronomy community.
+%; and Jon Barron, who has a knack for getting papers published.
+I must also thank the army of alpha-testers who have provided a lot of
+bug reports, great ideas for improving the system, and some very
+encouraging feedback.
+
+
+%I thank my office-mates for putting up with my overflowing desk full
+%of junk, and for providing such a great environment in which to work.
+%I thank Relu for keeping everything running, and for amusing us with
+%his lack-of-political-correctness antics.  I thank the lunch crew for
+%providing some genuine social interaction, and more than a few
+%hare-brained schemes and whit
+
+
+It is a pleasure to thank Iain Murray for many helpful ideas and
+insights; for listening politely while I rambled about some
+half-understood problem I was working on; and for being so amusingly
+English.
+
+
+I thank Sven Dickinson and Rich Zemel for serving on my advisory
+committee.  They provided excellent guidance, advice, and suggestions
+for improving this thesis.  I thank Doug Finkbeiner for taking the
+time to read my thesis and provide thoughtful comments, and for
+travelling to Toronto to serve as my external examiner.
+
+
+I thank my mom and my brother, Gerda and Devon Lang, who are two
+fantastic people who have always been there for me.
+
+
+I give huge thanks to my lovely wife Micheline.  A PhD is a
+team effort, and she is the foundation of Team Lang.  She provided a
+huge amount of love and encouragement, proof-read thesis drafts,
+forced me to practice my talks and listened patiently while I did, and
+kept our household running while I was embroiled in writing.  I
+couldn't have done it without her.  There are exciting times ahead and
+I'm so very happy to have her at my side.
+
+Finally, I thank my baby son Julian
+for having brought so much joy into our lives, and
+for sleeping soundly while I write these words.
+
+\end{acknowledgements}
+
+\tableofcontents
+
+%\listoftables
+%\listoffigures
+
+\end{preliminary}
+
+\numberparagraphs
+
+\chapter{Introduction}
+\graphicspath{{figs-review/}}
+\include{review}
+
+\chapter[\antitle: recognizing astronomical images]
+		{\an: recognition of arbitrary astronomical images%
+		  \footnote{This chapter was originally prepared as a manuscript
+			by me, David~W.~Hogg, Keir~Mierle, Michael~Blanton, and
+			Sam~Roweis.}}
+\label{chap:techreport}
+\graphicspath{{figs-techreport/}}
+\include{tech-report}
+
+\chapter[Verifying an astrometric alignment]
+        {Verifying a proposed alignment between astronomical images}
+\label{chap:verify}
+\graphicspath{{figs-verify/}}
+\input{verify}
+
+\chapter[Efficient implementation of \kdtreestitle]
+		{Efficient implementation of the \kdtreetitle data structure%
+        \footnote{This chapter was originally prepared as a manuscript
+        by me, Keir Mierle, and Aeron Buchanan.}}
+\label{chap:kdtree}
+\graphicspath{{figs-kdtree/}}
+\include{kdtree}
+
+\chapter{Conclusion}
+\label{chap:conclusion}
+\include{conclusion}
+
+\nonumberparagraphs
+
+\addcontentsline{toc}{chapter}{Bibliography}
+
+%% (change according to your preference)
+\bibliographystyle{plain}
+\bibliography{thesis}
+
+\end{document}

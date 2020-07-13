@@ -1,0 +1,57 @@
+\input{../tikzfig}
+\input{kdfigs-tikz}
+\setpagesize{\applypermfigwidth}{\applypermfigheight}
+\begin{document}%
+\thispagestyle{empty}%
+\begin{center}%
+\newcommand{\myscale}{0.8}
+\begin{tikzpicture}[>=latex, scale=\myscale]
+
+  \tikzstyle{vec}=[row sep=0, column sep=0, inner sep=0, outer sep=0, draw=black,
+    anchor=north west, nodes={line width=0pt, draw, black, minimum size=\myscale cm, inner sep=0, outer sep=0}]
+
+  \tikzstyle{lab}=[anchor=mid east, inner sep=0]
+
+  \node [lab] at (-0.1,-1) {Original label array:};
+  \node [matrix, vec, nodes={rotate=90, minimum width=1.5cm}] (labelA) at (0,0) {%
+    \node (L0) {cat}; & \node (L1) {budgie}; & \node (L2) {dog}; &
+    \node (L3) {robin}; & \node (L4) {parrot}; & \node (L5) {horse}; \\
+  };
+
+  \begin{scope}[yshift=-3.7cm]
+
+    \node [lab] at (-0.1,-0.5) {Permutation array:};
+    \node [matrix, vec] (permB) at (0,0) {
+      \node (B0) {4}; & \node (B1) {1}; & \node (B2) {3}; &
+      \node (B3) {2}; & \node (B4) {0}; & \node (B5) {5}; \\
+    };
+
+
+    \begin{scope}[yshift=-1.5cm]
+
+      \node [lab] at (-0.1,-1) {Permuted label array:};
+      \node [matrix, vec, nodes={rotate=90, minimum width=1.5cm}] (labelA) at (0,0) {%
+        \node (P0) {parrot}; & \node (P1) {budgie}; & \node (P2) {robin}; &
+        \node (P3) {dog}; & \node (P4) {cat}; & \node (P5) {horse}; \\
+      };
+
+    \end{scope}
+  \end{scope}
+
+  \draw [thick] (B0.north) to [out=60, in=240] (L4.west);
+  \draw [thick] (B1.north) to (L1.west);
+  \draw [thick] (B2.north) to (L3.west);
+  \draw [thick] (B3.north) to (L2.west);
+  \draw [thick] (B4.north) to [out=120,in=300] (L0.west);
+  \draw [thick] (B5.north) to (L5.west);
+
+  \draw [thick] (B0.south) to (P0.east);
+  \draw [thick] (B1.south) to (P1.east);
+  \draw [thick] (B2.south) to (P2.east);
+  \draw [thick] (B3.south) to (P3.east);
+  \draw [thick] (B4.south) to (P4.east);
+  \draw [thick] (B5.south) to (P5.east);
+
+\end{tikzpicture}%
+\end{center}%
+\end{document}

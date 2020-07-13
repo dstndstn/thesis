@@ -1,0 +1,74 @@
+\documentclass{article}
+\usepackage{tikz}
+%\usetikzlibrary{arrows,shapes,snakes,automata,matrix}
+\usetikzlibrary{arrows,shapes}
+\usepackage{helvet}
+\begin{document}
+\thispagestyle{empty}
+\begin{center}
+
+	\begin{tikzpicture}
+	  \filldraw [fill=blue!5!white] (0,0) rectangle(9,5);
+	  %\draw (5,5) node [anchor=south] {$N$};
+	  \draw (0,5) node [anchor=south west] {$N$};
+	  \draw [very thick,dashed] (6,0) -- (6,5);
+	  \draw (6,5) node [anchor=north east] {$L$};
+	  \draw (6,5) node [anchor=north west] {$R$};
+	  \begin{scope}
+		[shift={(5,4)}]
+		\draw (0,0) circle (2);
+		\fill (0,0) node [anchor=north, yshift=-2pt] {$q$} circle (2pt);
+		\draw [>=triangle 45,->,rotate=210] (0,0) -- node [anchor=south west] {$r$} (2,0);
+	  \end{scope}
+	  \draw [dotted] (5,3.5) -- (5,-0.5);
+	  \draw [dotted] (6,-0.25) -- (6,-0.5);
+	  \draw [>=triangle 45,<->] (5, -0.5) -- node [anchor=north, yshift=-1pt]
+	  %{Distance in the splitting dimension
+	  %from $q$ to the splitting plane for $R$}
+	  {$D_R$}
+	  (6, -0.5);
+	\end{tikzpicture}
+  \end{center}
+  %\\
+  \vspace{5pt}
+  \begin{center}
+	\begin{tikzpicture}
+	  \filldraw [fill=blue!5!white] (0,0) rectangle(9,5);
+	  %\draw (5,5) node [anchor=south] {$N$};
+	  \draw (0,5) node [anchor=south west] {$N$};
+	  \draw (6,0) -- (6,5);
+	  %\draw [dashed] (6,0) -- (6,5);
+	  %\draw (6,5) node [anchor=north east] {$L$};
+	  %\draw (6,5) node [anchor=north west] {$R$};
+	  \draw [very thick,dashed] (0,3) -- (6,3);
+	  \draw [very thick,dashed] (6,1.5) -- (9,1.5);
+	  \draw (6,3) node [anchor=south east] {$T$};
+	  \draw (6,3) node [anchor=north east] {$B$};
+	  \draw (6,1.5) node [anchor=south west] {$t$};
+	  \draw (6,1.5) node [anchor=north west] {$b$};
+	  \begin{scope}
+		[shift={(5,4)}]
+		\draw (0,0) circle (2);
+		\fill (0,0) node [anchor=north, yshift=-2pt] {$q$} circle (2pt);
+		\draw [>=triangle 45,->,rotate=210] (0,0) -- node [anchor=south west] {$r$} (2,0);
+	  \end{scope}
+
+	  \draw [dotted] (-0.5,4) -- (4.5,4);
+	  \draw [dotted] (-0.25,3) -- (-0.5,3);
+	  \draw [dotted] (5.5,4) -- (9.5,4);
+	  \draw [dotted] (9.25,1.5) -- (9.5,1.5);
+
+	  \draw [>=triangle 45,<->] (-0.5, 4) -- node [anchor=east, xshift=-1pt]
+	  %{Distance in the splitting dimension
+	  %from $q$ to the splitting plane for $B$}
+			{$D_B$}
+			(-0.5, 3);
+	  \draw [>=triangle 45,<->] (9.5, 1.5) -- node [anchor=west, xshift=1pt]
+	  %{Distance in the splitting dimension
+	  %from $q$ to the splitting plane for $b$}
+	  		{$D_b$}
+			(9.5, 4);
+	\end{tikzpicture}
+
+\end{center}
+\end{document}

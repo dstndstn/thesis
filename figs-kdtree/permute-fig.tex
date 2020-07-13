@@ -1,0 +1,106 @@
+\input{../tikzfig}
+\input{kdfigs-tikz}
+\setpagesize{\permutefigwidth}{\permutefigheight}
+\begin{document}%
+\thispagestyle{empty}%
+\begin{center}%
+\newcommand{\myscale}{0.8}
+\newcommand{\myscalex}{0.7}
+\begin{tikzpicture}[>=latex, scale=\myscale] %, every node/.style={draw=red}]
+  \tikzstyle{vec}=[row sep=0, column sep={\myscale cm,between origins}, inner sep=0, outer sep=0,
+    anchor=north west, draw=black,
+    nodes={draw, black, line width=0, minimum size=\myscale cm, inner sep=0, outer sep=0, anchor=center}]
+
+  \tikzstyle{outline}=[row sep=0, column sep={\myscale cm,between origins}, inner sep=0, outer sep=0,
+    matrix anchor=west, fill=gray!40, draw=black,
+	%nodes={draw, black, opacity=0, minimum width=\myscale cm, minimum height=\myscalex cm, inner sep=0, outer sep=0, anchor=center}]
+	nodes={line width=0, minimum width=\myscale cm, minimum height=\myscalex cm, inner sep=0, outer sep=0, anchor=center}]
+  \tikzstyle{lab}=[anchor=east, inner sep=0]
+  %  \tikzstyle{lr}=[anchor=mid, inner sep=0pt, minimum height=\myscalex cm]
+  %  \tikzstyle{lr}=[anchor=center, inner sep=0pt, outer sep=0pt, minimum height=\myscale cm]
+  %  \draw [thin, gray] (-0.1,-10) grid (7, 10);
+
+
+  %  \node [lab, text width=2.7cm] at (-0.1,-1) {Data array:}; %{Input data array}; %: $N=6$, $D=2$.};
+  \node [lab] at (-0.1,-1) {Input data array:}; %{Input data array}; %: $N=6$, $D=2$.};
+  \node [matrix, vec] (dataA) at (0,0) {%
+    \node {6}; & \node {0}; & \node {7}; & \node{3}; & \node{2}; & \node{9}; \\
+    \node {4}; & \node {8}; & \node {0}; & \node{5}; & \node{5}; & \node{5}; \\
+  };
+
+  \begin{scope}[yshift=-2.6cm]
+    \node [lab] at (-0.1,0) {Root node:};
+
+    \node [matrix, outline] at (0,0) {
+	  \node {\makebox[\myscale cm][l]{\ L=0,}};
+	  & & & & &
+      \node {\makebox[\myscale cm][r]{R=5\ }}; \\
+    };
+
+    \begin{scope}[yshift=-0.6cm]
+
+      \node [lab] at (-0.1,-0.5) {Permutation array:};
+      \node [matrix, vec] (permA) at (0,0) {
+        \node (A0) {0}; & \node (A1) {1}; & \node (A2) {2}; &
+        \node (A3) {3}; & \node (A4) {4}; & \node (A5) {5}; \\
+      };
+
+      \begin{scope}[yshift=-3.5cm]
+
+        \node [lab] at (-0.2,1.25) {Split on first dimension:};
+
+        \node [lab] at (-0.2,-0.5) {New permutation array:};
+        \node [matrix, vec] (permB) at (-0.1,0) {
+          \node (B0) {4}; & \node (B1) {1}; & \node (B2) {3}; \\
+        };
+        \node [matrix, vec] (permB2) at (3.1,0) {
+          \node (B3) {2}; & \node (B4) {0}; & \node (B5) {5}; \\
+        };
+
+        \begin{scope}[yshift=-1.6cm]
+          \node [lab] at (-0.2,0) {Child nodes:};
+          \node [matrix, outline] at (-0.1,0) {%
+		   \node {\makebox[\myscale cm][l]{\ L=0,}};
+			& &
+			\node {\makebox[\myscale cm][r]{R=2\ }}; \\
+          };
+          \node [matrix, outline] at (3.1,0) {
+		   \node {\makebox[\myscale cm][l]{\ L=3,}};
+		   	%& \node [lr] {\rule{0pt}{7pt}};
+			& &
+			\node {\makebox[\myscale cm][r]{R=5\ }}; \\
+          };
+
+          \begin{scope}[yshift=-0.6cm]
+
+            \node [lab] at (-0.2,-1) {New data array:};
+            \node [matrix, vec] (dataB) at (-0.1,0) {
+              \node (D0) {2}; & \node (D1) {0}; & \node (D2) {3}; \\
+              \node {5}; & \node {8}; & \node {5}; \\
+            };
+            \node [matrix, vec] (dataB2) at (3.1,0) {
+              \node (D3) {7}; & \node (D4) {6}; & \node (D5) {9}; \\
+              \node{0}; & \node{4}; & \node{5}; \\
+            };
+
+          \end{scope}
+        \end{scope}
+      \end{scope}
+    \end{scope}
+  \end{scope}
+
+  \draw [->, thick] (A0.south) to [out=300,in=120] (B4.north);
+  \draw [->, thick] (A4.south) to [out=240,in=60] (B0.north);
+  \draw [->, thick] (A2.south) -- (B3.north);
+  \draw [->, thick] (A3.south) -- (B2.north);
+  \draw [->, thick] (A1.south)+(-0.1,0) -- (B1.north);
+  \draw [->, thick] (A5.south)+(0.1,0) -- (B5.north);
+
+%  \draw [->, thick] (A0.south) to [out=300,in=120] (D4.north);
+%  \draw [->, thick] (A4.south) to [out=240,in=60]  (D0.north);
+%  \draw [->, thick] (A2.south) -- (D3.north);
+%  \draw [->, thick] (A3.south) -- (D2.north);
+%  \draw (current bounding box.south west) rectangle (current bounding box.north east);
+\end{tikzpicture}%
+\end{center}%
+\end{document}

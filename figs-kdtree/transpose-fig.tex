@@ -1,0 +1,44 @@
+\input{../tikzfig}
+\input{kdfigs-tikz}
+\setpagesize{\transposefigwidth}{\transposefigheight}
+\begin{document}%
+\thispagestyle{empty}%
+\begin{center}%
+\begin{tikzpicture}[>=latex', font=\scriptsize]
+
+  \tikzstyle{code}=[draw=black,
+    execute at begin cell=\node\bgroup\tt,
+    execute at end cell=\egroup;,
+    anchor=west,
+    row sep=-0.3em]
+
+  \node [matrix, code] (before) at (0,0) {
+\verb+struct kdtree {+\\
+\verb+  node* nodes;+\\
+\verb+};+\\
+\rule{0pt}{1pt} \\
+\verb+struct node {+\\
+\verb+  double splitval;+\\
+\verb+  uint8_t splitdim;+\\
+\verb+};+\\
+};
+
+
+  \node [matrix, code] (after) at (4.5,0) {
+\verb+struct kdtree {+\\
+\verb+  double* splitvals;+\\
+\verb+  uint8_t* splitdims;+\\
+\verb+};+\\
+};
+
+\path [inner sep=0, minimum size=0]
+(before.east)+(-0.3,0) node (n1) {} --
+(after.west) +(0.3,0) node (n2) {};
+
+\draw
+[black, line width=2pt, ->]
+(n1) to (n2);
+
+\end{tikzpicture}%
+\end{center}%
+\end{document}

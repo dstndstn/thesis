@@ -1,0 +1,28 @@
+\input{tikzfig}
+
+\input{kdfigs}
+
+\setpagesize{\kdtreefigwidth}{\kdtreefigheight}
+
+\begin{document}
+\thispagestyle{empty}
+\begin{center}
+
+  % columns are 3 1/4 inches wide by 8 7/8 high.
+  \newlength{\figw}
+  \setlength{\figw}{1.5in}
+  \begin{tikzpicture}[scale=2.54]
+    \useasboundingbox (0,0) rectangle (3.25, 6.25);
+    % first column.
+    \begin{scope}[scale=1.5]
+      \node at (0,0) [anchor=south west, inner sep=0pt] {\includegraphics[width=\figw]{fig-bb}};
+    \end{scope}
+    % second column.
+    \begin{scope}[xshift=1.75cm, scale=1.5]
+      \node at (0,0) [anchor=south west,inner sep=0pt] {\includegraphics[width=\figw]{fig-split}};
+    \end{scope}
+  \end{tikzpicture}
+
+\end{center}
+\end{document}
+

@@ -1,0 +1,225 @@
+\newcommand{\AJ}{\aj}
+
+% from http://mintaka.sdsu.edu/GF/bibliog/latex/floats.html
+% Alter some LaTeX defaults for better treatment of figures:
+% See p.105 of "TeX Unbound" for suggested values.
+% See pp. 199-200 of Lamport's "LaTeX" book for details.
+%   General parameters, for ALL pages:
+\renewcommand{\topfraction}{0.9}	% max fraction of floats at top
+\renewcommand{\bottomfraction}{0.8}	% max fraction of floats at bottom
+%   Parameters for TEXT pages (not float pages):
+\setcounter{topnumber}{2}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}     % 2 may work better
+\setcounter{dbltopnumber}{2}    % for 2-column pages
+\renewcommand{\dbltopfraction}{0.9}	% fit big float above 2-col. text
+%\renewcommand{\textfraction}{0.07}	% allow minimal text w. figs
+%   Parameters for FLOAT pages (not text pages):
+%\renewcommand{\floatpagefraction}{0.7}	% require fuller float pages
+% N.B.: floatpagefraction MUST be less than topfraction !!
+%\renewcommand{\dblfloatpagefraction}{0.7}	% require fuller float pages
+% remember to use [htp] or [htpb] for placement
+
+% \afterpage{clearpage}
+
+\usepackage{amssymb,amsmath}
+\usepackage{multirow}
+\usepackage{natbib}
+\usepackage{xspace}
+\usepackage{dcolumn}
+\usepackage{afterpage}
+\usepackage{calc}
+% See http://ringlord.com/latex-to-pdf-howto.html
+\pdfcompresslevel=9
+%\usepackage[pdftex]{graphicx}
+%\usepackage{thumbpdf}
+%\usepackage[pdftex]{color}
+\usepackage{graphicx}
+\usepackage{color}
+\definecolor{urlcolor}{rgb}{0,0,0}
+\definecolor{filecolor}{rgb}{0,0,0}
+\definecolor{linkcolor}{rgb}{0,0,0}
+\definecolor{anchorcolor}{rgb}{0,0,0}
+\definecolor{citecolor}{rgb}{0,0,0}
+\definecolor{menucolor}{rgb}{0,0,0}
+%\definecolor{runcolor}{rgb}{0,0,0}
+\usepackage[pdftex,
+        colorlinks=true, % color (true) or boxes (false)
+        urlcolor=urlcolor,       % \href{...}{...} external (URL)
+        filecolor=filecolor,     % \href{...} local file
+        linkcolor=linkcolor,       % \ref{...} and \pageref{...}
+        anchorcolor=anchorcolor,
+        citecolor=citecolor,
+        menucolor=menucolor,
+%        runcolor=runcolor,
+        pdfproducer={pdfLaTeX},
+        pdfpagemode=None,
+        bookmarksopen=true]{hyperref}
+% verbose=true
+
+\newlength{\figunit}
+\setlength{\figunit}{0.48\textwidth}
+
+% Marginal notes
+\newcommand{\note}[1]{\marginpar{{\footnotesize #1}}}
+
+\newcommand{\unit}[1]{\ensuremath{\mathrm{#1}}}
+\renewcommand{\arcmin}{\unit{arcmin}}
+\renewcommand{\mag}{\unit{mag}}
+\newcommand{\nanometers}{\unit{nm}}
+\newcommand{\degrees}{\unit{degrees}}
+\renewcommand{\deg}{\unit{degree}}
+\newcommand{\RA}{\unit{RA}}
+\newcommand{\Dec}{\unit{Dec}}
+\newcommand{\milliseconds}{\unit{ms}}
+
+\newcommand{\scamp}{\texttt{Scamp}\xspace}
+
+\newcommand{\captionpart}[1]{\textbf{#1}}
+
+\newcommand{\metadata}{meta-data\xspace}
+
+\newcommand{\xref}[2]{\mbox{#1~\ref{#2}}\xspace}
+\newcommand{\eqnref}[1]{\xref{equation}{#1}}
+\newcommand{\secref}[1]{\xref{section}{#1}}
+\newcommand{\subsubsecref}[1]{\secref{#1}}
+\newcommand{\Fig}{Figure\xspace}
+\newcommand{\fig}{figure\xspace}
+\newcommand{\figs}{figures\xspace}
+\newcommand{\Figs}{Figures\xspace}
+\newcommand{\figref}[1]{\xref{\fig}{#1}}
+\newcommand{\Figref}[1]{\xref{\Fig}{#1}}
+\newcommand{\Chapref}[1]{\xref{Chapter}{#1}}
+\newcommand{\chapref}[1]{\xref{chapter}{#1}}
+
+\newcommand{\healpix}{HEALPix\xspace}
+\newcommand{\healpixels}{HEALPixels\xspace}
+
+\newcommand{\squareparens}[1]{\left[ \, #1 \, \right]}
+\newcommand{\expect}[1]{\mathbb{E}\squareparens{#1}}
+\newcommand{\expectover}[2]{\mathbb{E}_{#1}\squareparens{#2}}
+\newcommand{\given}{\,\vert\,}
+
+\newcommand{\aposteriori}{\textsl{a posteriori}\xspace}
+\newcommand{\MAP}{maximum \aposteriori\xspace}
+
+\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\ngauss}{\mathcal{N}}
+\newcommand{\pgauss}[3]{\ngauss(#1 \, | \, #2,\, #3)}
+\newcommand{\ie}{\textit{i.e.}}
+\newcommand{\viceversa}{vice versa}
+\newcommand{\eg}{eg.}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\krondelta}[2]{\delta(#1, #2)}
+\newcommand{\thetamax}{\theta_{\mathrm{max}}}
+
+% tech-report stuff
+\newlength{\gridfigwidth}
+\setlength{\gridfigwidth}{3.05in}
+
+\newlength{\quadfigwidth}
+\setlength{\quadfigwidth}{3.05in}
+
+\newlength{\densityfigwidth}
+\setlength{\densityfigwidth}{6in}
+
+
+% tech-report, verify
+\newcommand\tstrut{\rule[-0.5ex]{0pt}{3ex}}
+\newcommand{\truepos}{\ensuremath{\mathrm{TP}}}
+\newcommand{\falsepos}{\ensuremath{\mathrm{FP}}}
+\newcommand{\trueneg}{\ensuremath{\mathrm{TN}}}
+\newcommand{\falseneg}{\ensuremath{\mathrm{FN}}}
+
+\newcommand{\starlabel}[1]{\ensuremath{#1}}
+\newcommand{\starA}{\starlabel{A}}
+\newcommand{\starB}{\starlabel{B}}
+\newcommand{\starC}{\starlabel{C}}
+\newcommand{\starD}{\starlabel{D}}
+\newcommand{\xC}{\ensuremath{x_\starC}}
+\newcommand{\yC}{\ensuremath{y_\starC}}
+\newcommand{\xD}{\ensuremath{x_\starD}}
+\newcommand{\yD}{\ensuremath{y_\starD}}
+
+
+
+% KDTREE stuff
+\newcommand{\codecomment}[1]{\# \hackbold{#1}}
+
+
+% VERIFY stuff
+\newcommand{\fg}{\ensuremath{F}}
+\newcommand{\bg}{\ensuremath{B}}
+\newcommand{\data}{\ensuremath{D}}
+
+\newcommand{\fgone}{\ensuremath{F_1}}
+\newcommand{\bgone}{\ensuremath{B_1}}
+\newcommand{\fgsymm}{\ensuremath{F_s}}
+\newcommand{\bgsymm}{\ensuremath{B_s}}
+\newcommand{\bgadapt}{\ensuremath{B_a}}
+\newcommand{\fgtwo}{\ensuremath{F_2}}
+
+%\newcommand{\fgsymm}{\ensuremath{F\!{}_s}}
+%\newcommand{\bgsymm}{\ensuremath{B\!{}_s}}
+%\newcommand{\underr}{\ensuremath{U_r}}
+%\newcommand{\undert}{\ensuremath{U_t}}
+%\newcommand{\underfg}{\ensuremath{U}}
+
+\newcommand{\tableheaderx}[1]{\multicolumn{1}{|c|}{\textbf{#1}}}
+\newcommand{\tableheader}[1]{\multicolumn{1}{c|}{\textbf{#1}}}
+\newcommand{\mtableheader}[2]{\multicolumn{#1}{|c|}{\textbf{#2}}}
+
+%\newcommand{\an}{\emph{Astrometry.net}}
+\newcommand{\an}{\textsl{Astrometry.net}\xspace}
+\newcommand{\antitle}{Astrometry.net\xspace}
+\newcommand{\kdtreetitle}{KD-tree\xspace}
+\newcommand{\kdtreestitle}{kd-trees\xspace}
+\newcommand{\kdtree}{kd-tree\xspace}
+\newcommand{\kdtrees}{kd-trees\xspace}
+\newcommand{\Kdtree}{Kd-tree\xspace}
+\newcommand{\Kdtrees}{Kd-trees\xspace}
+
+\DeclareMathOperator*{\argmax}{argmax}
+
+% make the space between the number and % sign a bit smaller than ~.
+\newcommand{\percent}{\!\%}
+
+\newcommand{\floor}[1]{\ensuremath{\left\lfloor #1 \right\rfloor}}
+\newcommand{\ceil}[1]{\ensuremath{\left\lceil #1 \right\rceil}}
+\newcommand{\half}{\ensuremath{\frac{1}{2}}}
+\newcommand{\smallhalf}{\ensuremath{\textstyle \frac{1}{2}}}
+%\newcommand{\deg}{\ensuremath{^\circ}}
+\newcommand{\latin}[1]{\textit{#1}}
+\newcommand{\etal}{\emph{et al.}~}
+
+\newcommand{\hackbold}[1]{\makebox[0pt][l]{\hspace{0.2pt}#1}#1}
+\newcommand{\class}{\hackbold{class} }
+\newcommand{\func}{\hackbold{def} }
+\newcommand{\spc}{ }
+
+\newcommand{\mindist}{\texttt{mindist}\xspace}
+\newcommand{\maxdist}{\texttt{maxdist}\xspace}
+\newcommand{\trick}[1]{\subsection{#1}}
+\DeclareMathOperator*{\argmin}{argmin}
+
+\newenvironment{codesize}
+               {\begin{scriptsize}}
+               {\end{scriptsize}}
+
+\newcommand{\tabstops}{123\=123\=123\=123\=123\=\kill}
+
+\newenvironment{pcode}
+               {\begin{center}% \fbox{%
+			     \linespacing{1.25}
+               \begin{minipage}[c]{\textwidth}%
+               \begin{codesize}%
+                   \tt
+                   \begin{tabbing}
+                     \tabstops
+               }
+               {\end{tabbing}%
+                 \end{codesize}%
+                 \end{minipage}%
+                 \end{center}%
+               }
+

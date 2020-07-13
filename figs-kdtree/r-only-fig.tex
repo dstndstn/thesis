@@ -1,0 +1,95 @@
+\input{../tikzfig}
+\input{kdfigs-tikz}
+\setpagesize{\ronlyfigwidth}{\ronlyfigheight}
+\begin{document}%
+\thispagestyle{empty}%
+\begin{center}%
+\newcommand{\myscale}{0.8}
+\begin{tikzpicture}[scale=\myscale, >=latex]
+  \tikzstyle{box} = [draw, thick, minimum size=\myscale cm, inner sep=0, anchor=west]
+  \tikzstyle{lab} = [anchor=east]
+
+  \tikzstyle{brace} = [anchor=north, inner sep=0]
+  \tikzstyle{lev}   = [anchor=south, inner sep=0]
+
+  \tikzstyle{plusone} = [anchor=west,pos=0.4, font=\footnotesize]
+
+  \begin{scope}[yshift=0.8cm, nodes={anchor=base}]
+    \draw (1,-0.1) node [brace] {$\overbrace{\rule{0.6cm}{0pt}}$};
+    \draw (1,0) node [lev] {1};
+
+    \draw (2.7,-0.1) node [brace] {$\overbrace{\rule{1.2cm}{0pt}}$};
+    \draw (2.7,0) node [lev] {2};
+
+    \draw (5.9,-0.1) node [brace] {$\overbrace{\rule{2.4cm}{0pt}}$};
+    \draw (5.9,0) node [lev] {3};
+
+    \draw (0.4,0) node [lab, anchor=base east] {Level in the tree:};
+  \end{scope}
+
+  \begin{scope}[yshift=-0.2cm]
+    \begin{scope} [xshift=0.5cm]
+      \draw (0,0) node (N0) [box] {0};
+      \draw (-0.1,0) node [lab] {Node index ($i$):};
+    \end{scope}
+    \begin{scope} [xshift=1.7cm]
+      \draw (0,0) node (N1) [box] {1};
+      \draw (1,0) node (N2) [box] {2};
+    \end{scope}
+    \begin{scope} [xshift=3.9cm]
+      \draw (0,0) node (N3) [box] {3};
+      \draw (1,0) node (N4) [box] {4};
+      \draw (2,0) node (N5) [box] {5};
+      \draw (3,0) node (N6) [box] {6};
+    \end{scope}
+  \end{scope}
+
+
+  \begin{scope}[yshift=-1.5cm]
+    \begin{scope} [xshift=0.5cm]
+      \draw (0,0) node (R0) [box] {19};
+      \draw (-0.1,0) node [lab] {Rightmost ($R$):};
+    \end{scope}
+    \begin{scope} [xshift=1.7cm]
+      \draw (0,0) node (R1) [box] {9};
+      \draw (1,0) node (R2) [box] {19};
+    \end{scope}
+    \begin{scope} [xshift=3.9cm]
+      \draw (0,0) node (R3) [box] {4};
+      \draw (1,0) node (R4) [box] {9};
+      \draw (2,0) node (R5) [box] {14};
+      \draw (3,0) node (R6) [box] {19};
+      %\draw (5,0) node (S) [anchor=west] {{\small store these}};
+    \end{scope}
+  \end{scope}
+
+  \begin{scope}[yshift=-3.5cm]
+    \begin{scope} [xshift=0.5cm]
+      \draw (0,0) node (L0) [box] {0};
+      \draw (-0.1,0) node [lab] {Leftmost ($L$):};
+    \end{scope}
+
+    \begin{scope} [xshift=1.7cm]
+      \draw (0,0) node (L1) [box] {0};
+      \draw (1,0) node (L2) [box] {10};
+    \end{scope}
+
+    \begin{scope} [xshift=3.9cm]
+      \draw (0,0) node (L3) [box] {0};
+      \draw (1,0) node (L4) [box] {5};
+      \draw (2,0) node (L5) [box] {10};
+      \draw (3,0) node (L6) [box] {15};
+      %\draw (5,0) node (DS) [anchor=west] {{\small don't store these}};
+    \end{scope}
+  \end{scope}
+    
+  \draw [->, thick] (R1.south) to node [plusone] {+1} (L2.north);
+  \draw [->, thick] (R3.south) to node [plusone] {+1} (L4.north);
+  \draw [->, thick] (R4.south) to node [plusone] {+1} (L5.north);
+  \draw [->, thick] (R5.south) to node [plusone] {+1} (L6.north);
+
+  %\draw [->, thick, shorten >=0.2cm] (S.west)  to (R6.east);
+  %\draw [->, thick, shorten >=0.2cm] (DS.west) to (L6.east);
+\end{tikzpicture}%
+\end{center}%
+\end{document}

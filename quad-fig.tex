@@ -1,0 +1,65 @@
+\input{tikzfig}
+
+%%%%%%
+%%%%%%  Note, the canonical quad-fig.pdf I use in talks comes from
+%%%%%%  documents/talks/dstn/2009-07-23-astrometry.net-galaxycoffee/
+%%%%%%
+
+%\newcommand{\arcmin}{arcmin}
+%\input{preamble}
+\input{tech-report-common}
+
+\setpagesize{\quadfigwidth}{\quadfigwidth}%{0in}
+
+%\pdfpagewidth 3.1in
+%\pdfpageheight 3.1in
+
+\begin{document}
+\thispagestyle{empty}
+\begin{center}
+  \def\scale{5}
+  \def\invscale{0.2}
+  \def\star{circle(0.7 pt)}
+  \def\ticklen{1pt}
+  \begin{tikzpicture}[rotate=10, scale=\scale]
+	\tikzstyle{axes}=[]
+    % Need: \cx + \dx <= 1
+    %       \cx < \dx
+    \def\cx{0.35}
+    \def\cy{0.2}
+    \def\dx{0.5}
+    \def\dy{0.75}
+
+    \fill [black!15, draw=black!50] (0,0) -- (\dx,\dy) -- (1,1) -- (\cx,\cy) -- cycle;
+
+	\begin{scope}[style=axes]
+	  \draw[thick] (0,0) -- (1,0) node[right] {$x$} coordinate(x axis);
+	  \draw[thick] (0,0) -- (0,1) node[above] {$y$} coordinate(y axis);
+
+	  \draw[>=triangle 45,->,thick] (0.95,0) -- (0.96,0);
+	  \draw[>=triangle 45,->,thick] (0,0.95) -- (0,0.96);
+
+	  \draw[xshift=1 cm] (0pt,\ticklen) -- (0pt,-\ticklen) node[below] {$1$};
+	  \draw[yshift=1 cm] (\ticklen,0pt) -- (-\ticklen,0pt) node[left] {$1$};
+	\end{scope}
+
+	\draw [very thin,gray] (1,0) -- (1,1) -- (0,1);
+	
+	% ABCD
+	\filldraw
+   	%(0,0)     \star node[anchor=north east]{\starA}
+	%(1,1)     \star node[anchor=south west]{\starB}
+    (0,0)     \star node[anchor=north east]{$A = (0,0)$}
+	(1,1)     \star node[anchor=south west]{$B = (1,1)$}
+	(\cx,\cy) \star node[anchor=north west]{\starC}
+	(\dx,\dy) \star node[anchor=south east]{\starD};
+
+	\draw [dashed] (\cx,0) node[anchor=north]{\xC} -- (\cx,\cy) -- (0,\cy) node[anchor=east]{\yC};
+	\draw [dashed] (\dx,0) node[anchor=north]{\xD} -- (\dx,\dy) -- (0,\dy) node[anchor=east]{\yD};
+
+	% Circle
+	\draw (0.5,0.5) circle (0.70710678118654746);
+  \end{tikzpicture}
+
+\end{center}
+\end{document}

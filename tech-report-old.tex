@@ -1,0 +1,936 @@
+% notes
+% -----
+% - use \figurename not figure !
+% - use \USNOB and \deg and \arcmin and \starA \starB and etc...
+% - compile with make, not LaTeX
+
+% to-do
+% -----
+% - DWH: various citation references don't work -- see .aux file.
+% - DSTN: make figures
+%   - the USNO-B has been uniformized
+%   - the catalog of quads is uniform
+%   - a close-up of the sky showing the quad footprints in some area
+%   - some figures relating to the calibration of SDSS and GALEX.
+% - Discussion needs outline
+% - Discussion needs to be written
+% - DWH must deal with all comments marked ``DWH''
+% - DSTN must deal with all comments marked ``DSTN''
+
+\documentclass[12pt,preprint]{aastex}
+\usepackage{graphicx}
+\newcommand{\An}{\textsl{Astrometry.net}}
+\newcommand{\kdtree}{KD-tree}
+\newcommand{\unit}[1]{\mathrm{#1}}
+\newcommand{\percent}{\unit{percent}}
+\renewcommand{\%}{\percent}
+\renewcommand{\arcmin}{\unit{arcmin}}
+\renewcommand{\deg}{\unit{deg}}
+\newcommand{\etal}{\latin{et al.}}
+\begin{document}
+
+\title{\textsl{Astrometry.net}: \\
+       Blind astrometric calibration of arbitrary astronomical images}
+\author{Dustin~Lang\altaffilmark{1},
+        David~W.~Hogg\altaffilmark{2,3},
+        Keir~Mierle\altaffilmark{1,4},
+        Michael~Blanton\altaffilmark{2}, \&
+        Sam~Roweis\altaffilmark{1,4}
+}
+\altaffiltext{1}{Department of Computer Science, University of Toronto}
+\altaffiltext{2}{Center for Cosmology \& Particle Physics, Department of Physics, New York University}
+\altaffiltext{3}{to whom correspondence should be addressed: david.hogg@nyu.edu}
+\altaffiltext{4}{Google Inc., Mountain View, CA}
+
+\begin{abstract}
+We have built a reliable and robust system that takes as input an
+astronomical image, and returns as output the pointing, scale, and
+orientation of that image (the astrometric calibration or WCS
+information).  The system requires no first guess, and works with the
+information in the image pixels alone.  The success rate is
+$>99.9~\percent$ for contemporary near-ultraviolet and visual imaging
+survey data, with no false positives.  We are using this system to
+generate consistent and standards-compliant meta-data for all digital
+and digitized astronomical imaging, no matter what its archival state,
+including imaging from plate repositories, individual scientific
+investigators, and amateurs.  This is the first step in a program of
+making all of the world's heterogeneous astronomical data
+interoperable.
+\end{abstract}
+
+\section{Introduction}
+
+In this report, we describe a successful enterprise in the area of
+pattern recognition, or object recognition in computer vision: We can
+take any image of the night sky, and return its pointing, scale, and
+orientation---its astrometric calibration meta-data---with a very high
+success probability and essentially no false positives.  This is not
+just a parlor trick: Successful recognition of an astronomical image
+brings with it a great deal of meta-data, including the precise
+astrometric calibration of the image, the objects contained in the
+image, and the information required to estimate the photometric
+bandpass of the image, its sensitivity, and the time at which it was
+taken \cite{barron08b}.  These meta-data are required for reliable
+scientific use of the image.
+
+\paragraph{Our problem is easy.}
+There are many obstacles to general systems that can
+recognize large classes of objects in images.  In general, objects
+move around relative to their backgrounds and are randomly occluded by
+complex objects in the foreground, they are often articulated or
+deformable (think limbs), they can be viewed from any angle, there are
+large changes possible in the same object or object class (flowers
+bud, bloom, and wilt), specific feature matching and identification is
+non-trivial (find the nose), and they are subject to dramatic changes
+in lighting.  We have none of these problems when we consider
+astronomical images.
+
+The stars are extremely distant, so our viewpoint is effectively
+fixed.  Of course we are moving as are the stars in our Galaxy, so
+there are significant (and extremely important) motions on human
+timescales.  However, these configurational and viewpoint changes
+create individual-star angular movements that are very small relative
+to the mean inter-star separations in our catalogs (this is the
+relevant comparison, since it determines the changes to the apparent
+shapes of asterisms), and smaller than or comparable to the angular
+resolution of typical imaging.  The stars create their own light,
+there are no differences of illumination, only differences of relative
+brightness in different observational bandpasses.  Stars appear
+to modern instruments as unresolved points, much brighter than the
+background level (in most cases).  This makes them very easy to detect
+and measure; we don't have the usual problems of feature
+identification.
+
+These properties makes our problem much easier than typical image
+interpretation tasks.  We also benefit from the fact that large,
+uniform catalogs exist, containing $>10^8$ stars observed in multiple
+bandpasses and over time periods measured in decades.  This means that
+when we \emph{do} find a matching asterism, we can say quite a bit
+about it.
+
+\paragraph{Our problem is hard.}
+On the other hand, we face a few challenges that are significant.  The
+first is that the sky is big: A typical astronomical image we consider
+includes substantially less than $10^{-6}$ of the sky, and contains
+thousands of stars, only a fraction of which have been previously
+catalogued.  Furthermore, the stars have been catalogued using data in
+a bandpass which, in general, can be very different from the bandpass
+in which the input image was taken.  There can be arbitrary variation
+in the sensitivity to particular stars or the probability that a
+bright star in the image is represented in the catalog.
+
+For many images we see, on the web, on magnetic tapes in academic
+offices, and on hard drives or CDs in the basements of amateurs, we do
+not know very much: We don't know when they were taken, what telescope
+was used, what bandpass they are in, how big they are (in an angular
+sense), where they are centered on the sky, the exposure time, or what
+mode the telescope or image rotator was in.  This leads to an enormous
+heterogeneity in what we hope to see, and sets a high bar if we want
+to create a complete census of the world's astronomical data.
+
+\paragraph{The need is great.}
+There is a sense in which astrometric calibration is trivial:
+Observers know what they are observing, and telescopes know where they
+are pointing!  However, astrometric calibration is also non-trivial:
+The vast majority of astronomical images in existence have no---or
+worse, wrong---astrometric meta-data.  There are several reasons for
+this: The WCS standard for astrometric meta-data appeared relativey
+late (Greisen \& Calabretta 2002, Calabretta \& Greisen 2002); many
+astronomers use their own personal conventions for measuring and
+recording the information; some projects do not require precise global
+coordinates for any image so do not bother recording them; many
+telescopes have control systems that drift relative to the sky as
+observers tweak the pointing; and many telescope--instrument
+combinations output images with meta-data that are not
+standards-compliant or simply wrong.
+
+A system to automatically and blindly calibrate all astronomical
+imaging coming off of instruments at each of the world's observatories
+could catch telescope drifts and faults in real time, potentially
+saving significant amounts of observing time and operational costs.
+Similarly, if observers are given already-calibrated data from the
+telescope, then they can avoid this task and spend their time and
+grant money doing more illuminating data analysis.
+
+Amateur observers, many of whom take professional-grade data and some
+of whom publish IAU circulars and discoveries, do not usually have the
+tools they need to produce accurate and standards-compliant
+astrometric calibrations for their images.  A system that provides
+these could bring a whole treasure trove of data to light, backed by a
+community that has always had enthusiasm for supporting basic
+research.
+
+Historical plate repositories are filled with photographic plates
+which represent an irreproducible record of the sky.  Efforts to digitize
+these collections have been hindered by the fact that it is difficult to
+record in a reliable way the plates' meta-data.
+This is because the meta-data exist in hand-written logs, not all of
+which survive, and not all of which are legible and organized.
+Furthermore, these logs contain many errors, and more errors are
+introduced in data entry.  The barriers to making these meta-data
+accurate and accessible obscure these data---which provide our only
+record of the sky's time history---from scientific view.  Imagine
+looking for precursor activity for some future Galactic supernova.  It
+may have appeared in hundreds of plates over the last hundred years.
+There is no way to find those data without reliable and
+standards-compliant astrometric meta-data.
+
+\paragraph{Prior work.}
+An early application of blind astrometric matching was for attitude
+estimation of spacecraft: by identifying constellations, the pose of
+the camera can be determined \citep{liebe1993}.  In such systems,
+triangles (three-star asterisms) are typically used
+(e.g. \citealt{junkins1977}).  Triangles are effective in this domain
+because the images span tens of $\deg$ and contain only dozens of
+very bright stars: the search space is small.  Furthermore, these
+systems are not fully ``blind'' in that they are designed for
+particular cameras, the specifications of which are available to the
+system designers.
+
+Triangle-based approaches have also been used to solve the astrometry
+problem when a good initial estimate is available \citep{palbakos}.
+Because the search domain is limited to a small area around the
+initial estimate, the triangle-based approach is still effective.
+Completely blind systems have been attempted previously (for example,
+\citealt{harvey} and references therein) but none we know of have been
+able to achieve the scalability and fidelity of our approach.
+
+Both the triangle matching approach and ours (described below) are
+based on ``geometric hashing'' (for example, \citealt{lamdan1990},
+\citealt{huttenlocher1990}).  Our system uses the same two-step
+approach used by these systems where a set of hypotheses are generated
+from sparse matches, then a second stage does detailed verification.
+
+There are automated calibration systems that refine the astrometric
+WCS of an image, given a good first guess (for example,
+\citealt{valdes, mink, bertin}).  These systems are reliable and
+robust, but they require a reasonable first guess about the image
+pointing, orientation, and scale.  These systems are not directly
+related to the system described below, because, in some system, this
+system \emph{creates} that good first guess, for images that have no
+first guess, or for which that first guess is untrusted.
+
+\section{Methods}
+
+Our basic approach, as outlined above, involves two components.  The
+first is an indexing system for asterisms, which can examine a query
+image and very quickly generate candidate explanations for that image,
+where each explanation consists of a proposed location, orientation
+and field of view on the celestial sphere.  The second component is a
+verification criterion, which can very accurately decide if any
+proposed explanation is a true positive match to the query image.
+
+The system we developed begins by extracting the two-dimensional
+positions of stars in a query image, typically yielding a few hundred
+stars localized to pixel accuracy or better.  Then, using a subsets of
+those stars (subsets of four in the experiments here), the indexing
+system generates \emph{hypotheses}---proposed alignments of the query
+image to the sky.  We assign a score to each hypothesis by measuring
+its ability to predict the locations of other stars in the image
+(taking into account that we cannot expect the image and catalog stars
+to overlap exactly). The number of such overlaps, compared with the
+number of image and catalog objects and the pixel tolerance for
+alignment allows us to accurately estimate the chance of the
+hypothesis being a false match; we output a result only when this
+chance is vanishingly small.  We continue generating and testing
+hypotheses until we find one with sufficient confidence and output it
+as our chosen match.  In some cases, we never find a hypothesis with
+sufficient confidence (or we give up searching before we find one), but
+our thresholds are set conservatively enough that we almost never
+produce a false positive match.
+
+\subsection{Star detection}
+
+The system automatically detects compact objects each input image and
+centroids them to yield the pixel-space locations of stars. This
+problem is an old one in astronomy; the challenge here is to perform
+it robustly on the large variety of input images the system
+faces. Luckily, because the rest of the system is so robust, it can
+handle detection lists that are missing a few stars or have some
+contaminants.
+
+The first task is to identify (detect) localized sources of light in
+the image.  Most astronomical images exhibit sensitivity variations as
+well as scattering, and we need to find peaks on top of such
+variations, so first we subtract off a median-smoothed version of the
+image to ``flatten'' it. Next, to find statistically significant
+peaks, we need to know the approximate noise level.  We find this by
+choosing a few thousand random pairs of pixels separated by five rows
+and columns, calculating the difference in the fluxes for each pair,
+and calculating the variance of those differences, which is
+approximately twice the variance $\sigma^2$ in each pixel. At this
+point, we identify pixels which have values in the flattened image
+that are $>8\,\sigma$, and connect detected pixels into individual
+detected objects.
+
+The second task is to find the peak or peaks in each detected object.
+This determination begins by identifying pixels that contain larger
+values than all of their neighbors. However, keeping all such pixels
+would retain peaks that are just due to uncorrelated noise in the
+image and individual peaks within a single ``object.'' To clean the
+peak list, we look for peaks that are joined to smaller peaks by
+saddle points within $3\,\sigma$ of the larger peak (or $1~\percent$
+of the larger peak's value, whichever is greater), and trim the
+smaller peaks out of our list.
+
+Finally, given the list of all peaks, the third task is to centroid
+the star position at sub-pixel accuracy. Following previous work
+\citep{lupton}, we take a $3\times 3$ grid around each star's peak
+pixel, effectively fitting a Gaussian model to the nine values, and
+using the peak of the Gaussian. Occasionally this procedure produces a
+Gaussian peak outside the $3\times 3$ grid, in which case we default
+to the peak pixel, although such cases are virtually always caused by
+image artifacts.  This procedure produces a set of $x$ and $y$
+positions in pixel coordinates corresponding to the position of
+objects in the image.
+
+\subsection{Hashing of asterisms to generate hypotheses}
+
+Hypotheses about the location of an astronomical image live in the
+continuous 4-dimensional space of position on the celestial sphere
+(pointing of the camera's optical axis), orientation (rotation of the
+camera around its axis), and field of view (solid angle subtended by
+the camera image).  If hypothesis space were discretized to
+approximately the angular scale at which our system operates, there
+would be $>10^{20}$ discrete possibilities.  Local refinement of a coarse
+initial guess might reduce the number of required starting
+possibilities to ``only'' a few billion, but even then, exhaustive
+enumeration followed by verification of each hypothesis would be
+impractical.  We need a fast search heuristic that ranks the
+order in which we check hypotheses and that almost always proposes the
+correct hypothesis early enough that we have the resources to discover
+it.
+
+We have solved this massive search problem using a continuous
+geometric hash code. This code computes local ``shape fingerprints''
+by mapping the relative positions of groups of four nearby stars
+(``quads'') into 4-dimensional continuous-valued codewords (points in
+a 4-dimensional vector space).  The geometric hash is, essentially,
+the positions $(\xC,\yC)$ and $(\xD,\yD)$ of two of the four stars
+(called ``$\starC$'' and ``$\starD$'')
+in a coordinate system defined by the two
+most widely separated stars (called ``$\starA$'' and ``$\starB$'').  This is
+illustrated in \figurename~\ref{fig:quad}.  The code has some
+symmetries; swapping $\starA$ and $\starB$
+converts a code $(\xC,\yC,\xD,\yD)$ into
+$(1-\xC,1-\yC,1-\xD,1-\yD)$ while swapping $\starC$ and $\starD$ converts
+$(\xC,\yC,\xD,\yD)$ into $(\xD,\yD,\xC,\yC)$. In practice, we 
+break this symmetry by demanding that $\xC \le \xD$ and that
+$\xC + \xD \le 1$; we consider only the permutation that satisfies these
+conditions (within noise tolerance).
+
+This mapping has several properties that make it well suited to our
+indexing application. First, the code vector is \emph{invariant} to
+translation, rotation and scaling of the star positions so that it can
+be computed using only the relative positions of the four stars in any
+coordinate system (including pixel coordinates in a query image).
+Second, the mapping is \emph{smooth}: small changes in the relative
+positions any of the stars result in small changes to the components
+of the code vector; this makes the codes resilient to small amounts of
+positional noise in star positions.  Third, if stars are uniformly
+distributed on the sky (at the angular scale of the quads being
+indexed), codes will be uniformly distributed in (and thus make
+good use of) the 4-dimensional code-space volume.
+
+Noise in the image and distortion caused by the atmosphere and telescope optics
+lead to noise in the measured positions of stars in the image.  In general this
+noise causes the stars in a quad to move slightly with respect to each other,
+which yields small changes in the shape fingerprint of the quad.  Therefore, we
+must always match the image fingerprint with a \emph{neighbourhood} of
+fingerprints in the index.
+
+The standard geometric hashing ``recipe'' \citep{geometrichashing}
+would suggest using triangles rather than quads.  However, the
+positional noise level in typical astronomical images is sufficiently
+high that triangles are not distinctive enough.  Since we want to
+recognize a large number of images, our index must contain many
+triangles; hence the neighbourhood in the index that matches any given
+query triangle will contain many thousands of matching triangles, the
+vast majority of which will be coincidental (false) matches.  By using
+quads instead of triangles, we nearly \emph{square} the
+distinctiveness of our features: a quad can be thought of as two
+triangles that share a common edge.  Since the feature space is
+larger, the neighbourhood around any given query quad contains many
+fewer coincidentally-matching index quads.
+
+In principle, we could also do quintuples, which would be even more
+constraining.  However, there are two disadvantages to increasing the
+number of stars in the indexed $k$-star asterism.  The first is that
+the probability that all $k$ of the stars in an indexed asterism
+appear in the image and that all $k$ of the stars in a look-up
+asterism appear in the index catalog both decrease with increasing
+$k$.  For images taken at wavelengths far from the catalog wavelength,
+or shallow images, this consideration can become severe.  The second
+disadvantage is that near-neighbor lookup, even with a \kdtree,
+becomes more time-consuming with increasing dimensionality, and the
+dimensionality of the index space is $2\,k-4$.
+
+To actually build our indexing system, we place the quad-based,
+geometrically invariant local hash codes into a precomputed index. In
+a classic index on a set of files or documents, we would decide on a
+set of indexing terms (for example, many thousands of vocabulary words
+or short tuples of common words) and then sweep over the entire
+corpus, making lists of the documents containing each term.  To
+quickly find all the documents containing, for example, the words
+``computer'', ``science'', and ``astronomy'' we do not need to search
+the entire corpus; instead we invert the query, retrieving the
+precomputed list of documents mentioning ``astronomy'' and
+intersecting it with the lists for the terms ``computer'' and
+``science''.  Somewhat confusingly, this indexing strategy is
+sometimes referred to as an ``inverted index'' or an ``inverted file
+system'' in the computer science literature \citep{invertedpaper}, but
+it serves the same function as the index in a book.  Analogously,
+our system divides the sky into millions of equal-area patches,
+somewhat smaller than the angular scale of the query images we plan to
+localize at run time. Within each patch we select a number of
+quadruples of nearby stars from our reference catalog, and use our
+geometric hash function to compute a 4-dimensional code for each such
+quad.  We enter these codes into a code-space index, along with
+the associated location on the sky and the identities of the four
+catalog stars from which the code was created. The codes play the same
+role as the index terms in a conventional document index system but
+they are now continuous rather than discrete. To accommodate this, our
+index data structure---a fast, memory-efficient, and pointer-free implementation
+of a \kdtree \citep{lang08}---supports fast retrieval of all codes in the neighbourhood of
+any 4-dimensional point, allowing us to quickly find all the places on
+the sky at which a specific shape fingerprint is reproduced almost
+exactly.  In effect, we \emph{do} examine the entire sky (in the same
+way that building a traditional index requires looking at every
+document), but we do it only once, at indexing time, to populate our
+code-space and not for each query we process during run time
+retrieval.
+
+When presented with a list of stars from an image to calibrate, the
+system iterates through groups of four stars, treating each group as a
+quad and computing its code using the hash function applied to the
+detected positions. Using the computed code, we perform a
+(neighbourhood) lookup in the index, retrieving all the stored codes
+that are almost identical to the computed one along with their
+corresponding locations on the sky.  Each retrieved code is
+effectively a \emph{hypothesis}, which proposes to identify the four
+reference catalogue stars used to create the code at indexing time
+with the four stars used to compute the query code. Each such
+hypothesis is verified as described below.
+
+The question of which hypotheses to check and when to check them is
+a purely heuristic one. One could chose to wait until a hypothesis
+has two or more ``votes'' from independent codes before checking it
+or check every hypothesis as soon as it is proposed, whichever is
+faster.  We prefer to order our hypotheses by trying the brightest
+stars first, but this is also merely a search acceleration, which
+does not impact the quality of the results.
+
+In order for this approach to be successful, the index must balance
+several properties.  These are the spatial uniformity of quads, the
+brightness of the stars in quads, and the number of times any star is
+used in a quad. Spatial uniformity is needed in order to calibrate
+images anywhere on the sky. Since bright stars are more likely to
+appear in query images, we should preferentially build quads with
+them.  However, if bright stars are indexed too heavily, then a single
+lost or badly-localized star in the query image leads to the loss of
+many quads which could potentially correctly identify the image
+location.  We achieve these objectives by first processing the
+\USNOB\ \citep{usnob, barron} to select a spatially uniform subsample
+of bright stars.  Then we build quads in a spatially uniform way,
+starting with the bright stars, but adding the restriction that each
+star can only be used in $N$ quads (typically $N=8$).
+
+Implementation of an index that achieves these properties is made
+easier if the angular scale (angular $\starA$--$\starB$ distance)
+of all quads is
+restricted to lie within a small range (for example, a factor of
+two). Unfortunately, the very nature of the blind calibration problem
+means that we do not know the angular plate scale of the query image a
+priori. As a purely practical matter, we resolved this tension by
+constructing several disjoint indices, each containing quads spanning
+a small range of angular scales. After source extraction, each of
+these indices is used independently (in parallel if possible) to
+generate hypotheses for the query image. The first of these candidate
+hypotheses that passes our verification test terminates the search on all
+indices and is used to generate the final astrometric
+calibration.  
+
+\subsection{Verification of hypotheses}
+
+The verification stage, which we explain now, is a straightforward
+statistical test based on the chance of accidental agreement (as
+measured by positional alignment of features) between any proposed
+match and the query.
+
+The statistical test we use to be certain we have a correct answer is
+based on the \emph{predictive power} of a hypothesis. In general, if a
+prototype selected using only a small number of features of the query
+accurately predicts a large number of \emph{other} features in the
+query almost exactly, it is a high-confidence match.  In our
+application, this verification test is performed by proposing an
+alignment of the query image to the sky using the positions of only a
+small number of stars within the image---the stars in the quad that matched.
+We then ask, ``if this
+proposed alignment were correct, where else in the image would we
+expect to find stars?''
+
+Under the assumption that stars in the catalog are spatially uniformly
+distributed at the angular scale of the query (this is enforced by us
+in the regime in which our system operates), we can estimate the
+probability of a false positive match under this criterion by thinking
+of the $N$ detected stars in the image (excluding those used to
+compute the alignment under consideration) as randomly located
+``targets'' at which we randomly throw $M$ ``darts'' from the
+catalog. (The number of darts $M$ is the number of catalog stars
+contained in the footprint of the query image under the hypothesized
+alignment.) If our positional tolerance for almost exact alignment of
+a catalog star and an image star is $\theta$ (measured either in
+pixels or in $\deg$) then each target has a size $\pi\theta^2$
+(measured in image area or in solid angle). Assuming the entire query
+image has size $\Omega$ (and the targets are small enough and few
+enough for their overlap, if any, to be insignificant) then the
+fractional target area is $\alpha=\pi\theta^2/\Omega$.  When either
+the number of catalog stars (darts) $M$ or the number of image stars
+(targets) $N$ is large compared to the number of ``hits'' $K$ (that
+is, the number of image--catalog pairs aligning to within a tolerance
+$\theta$), the probability is well approximated by the Poisson
+distribution: $\alpha^K (MN)^K \exp(-\alpha M N)/k!$.  Thus, the
+probability of \emph{accidentally} discovering an alignment that
+generates $K$ hits after examining $Q$ hypothesis alignments is at
+most
+\begin{equation}
+\frac{Q}{k!} \: \: \alpha^K \: (MN)^K \: \exp(-\alpha M N)
+\end{equation}
+By requiring this bound to be exceedingly small we guarantee a false
+positive rate of zero for all practical purposes.
+
+Operationally, our system computes this probability bound after
+each hypothesis that it checks, and returns a verified match only if
+the bound drops below some user specified false-positive rate, which
+in our experiments is typically set exceedingly small (less than
+$10^{-9}$).
+
+Of course, as with all visual pattern matching problems, there is a
+certain amount of spatial noise present in the precise positions of
+features, both in the query and in the index prototypes. Positional
+comparison must be robust to this noise at the appropriate scale.  In
+astronomical images, however, the matching problem is further
+complicated by the fact that for virtually any image of a certain
+patch of the sky and virtually any all-sky catalog against which that
+image is to be matched, there are some detected stars in the image
+that are not present in the catalog (and, conversely, some stars in
+the catalog that are missing from the image). This is because the
+image and the catalog will have different sensitivities to stars of
+different brightnesses, temperatures, and physical properties, and
+both will contain a number of errors in the form of occlusions and
+processing artifacts that lead to stars being incorrectly inserted and
+removed.  Our verification method is robust to these sources of variability
+and does not require all (or even most) known stars in the
+catalog to match up with observed image stars in the query or
+\latin{vice versa}.
+
+While the verification test is crucial for maintaining the fidelity of
+our system, it is our method for rapidly generating good candidate
+proposals that is the key to success; it allows us to scale our system
+to search the entire sky in less than a second.
+
+For our application, a typical query might be an image about
+$10~\arcmin$
+on a side in which there lie few hundred catalog stars
+($M$). If we work with about 100 detected stars ($N$) and require
+alignment to within a few arcseconds ($\alpha=10^{-5}$), we generally
+discover a match resulting in dozens of hits ($K>10$) after examining
+a few tens of thousands of hypotheses ($Q<10^5$). Using the analysis
+above, the chance of such a solution being a false positive is
+estimated at less than $10^{-25}$ and is often closer to $10^{-100}$
+when we find, say, 30 hits.
+
+\section{Results}
+
+\subsection{Blind astrometric calibration of the Sloan Digital Sky Survey}
+
+We explored the potential for automatically organizing and annotating
+a very large real world data set by taking a sample of
+$9\times13~\arcmin^2$ $r$-band images generated by the Sloan Digital Sky
+Survey \citep{sdss} and considering them as an unstructured set of
+independent queries to our system.  For each SDSS image, we discarded
+all meta-data, including all positional and rotational information and
+the date on which the exposure was taken.  We allowed ourselves to
+look only at the two-dimensional positions of detected ``stars'' (most
+of which were in fact stars but some of which were galaxies or
+detection errors) in the image.  Normally, our system would take
+\emph{images} as input, running a series of image processing steps to
+detect stars and localize their positions.  The SDSS data reduction
+pipeline already includes such a process, so for this experiment we
+used these detected star positions rather than processing all the raw
+images ourselves.  Further experiments have shown that we would likely
+have achieved similar, if not better, results by using our own image
+processing software.
+
+The index we used for this test was generated by taking a cut
+of stars that are bright in the red bands from the \USNOB.
+We placed a fine HEALPix \citep{healpix} grid
+over the celestial sphere (with $\Nside=880$, yielding $9,292,800$
+grid cells), and selected the brightest $9$ objects (using R-band
+magnitudes) in each cell.  This yielded a bright, spatially uniform
+set of about $85$ million stars (yielding a density of about
+$0.58~\arcmin^{-2}$).
+% nstars=85,510,039
+ Using the same grid, we began building quads by examining the
+brightest four stars in each grid cell, then the fifth brightest, and
+so on, until a valid quad was built in each grid cell.  We demanded
+that the quads have diameter ($\starA$-$\starB$ distance) between $4.0$ and
+$5.6~\arcmin$.  We repeated this process $16$ times, shifting the
+grid slightly each time, adding the constraint that no quad is built
+more than once, and that no star be used in more than $8$ quads.  This
+resulted in nearly 150 million quads (giving an average quad density
+of $1.0~\arcmin^{-2}$).
+
+We constructed quads from these image stars, computed their codes and
+retrieved close matches to those codes from our index, checking the
+corresponding hypotheses until we found one whose probability of being
+a false match was less than $10^{-9}$. The results were extremely
+good: of the nearly 250,000 SDSS images we queried, $99.92~\percent$ of them
+(all but 186) were calibrated successfully with zero false
+positives. Of the unsuccessful images, a further 80 could be
+calibrated by applying our system directly to a composite image
+containing data from several bands. Of the remaining 106 failures,
+several show irregularities in the underlying catalogue from which our
+index was built or in the query image itself.  Even the small number
+of failures attributable to errors in the \USNOB\ prompted us
+to investigate semi-automated methods for cleaning the catalogue by
+removing spurious sources caused by diffration spikes and reflection
+halos \citep{barron}.
+
+For the particular index we built, the ``easiest'' $90~\percent$ of
+the images could be successfully calibrated by looking at only the 25
+brightest stars with an average amortized time of 12~ms per image.
+The remaining $10~\percent$ were the ``hard'' images, which required
+using up to 100 stars and took up to 150 seconds of CPU time.
+Building the index can be done in a few hours on a single machine, and
+calibration takes a few more hours.  We assumed that we knew the plate
+scale (field-of-view) of the images to within $2~\percent$, but we
+emphasize that exactly the same results would have been obtained,
+albeit more slowly, if we had built a series of indexes at various
+angular scales and tried to calibrate each image at all scales.  This
+statement can be made because we have no false positives; if we
+attempt calibration at a wide range of scales, the only successful
+verification will occur at the correct scale.  Direct tests confirm
+this.
+
+\subsection{Blind astrometric calibration of Galaxy Evolution Explorer data}
+
+% Run 132: GALEX GR2 jpegs (11076), index 500.
+
+In order to demonstrate that our system is capable of handling imagery
+outside the optical band, we applied it to images from the Galaxy
+Evolution Explorer (GALEX) space telescope \citep{galex}, which
+measures ultraviolet light.  We presented our system with JPEG
+renderings of the $11,076$ images in GALEX Release 2 (GR2).  The only
+information we gave our system about these images is that they are
+between $1$ and $180~\deg$ wide (GALEX produces circular fields
+with diameter about $1.1~\deg$.)
+
+For this test, we built a set of indices that cover the range of image
+scales.  Other than the number of stars and the range of quads, these
+indices are built exactly the same as the ones used for the SDSS test.
+In particular, they contain stars that are bright in the red band,
+even though we are calibrating images whose bandpass does not overlap
+the visible spectrum.  Each of these indices covers a factor of
+$\sqrt{2}$ of scales ($\starA$--$\starB$ angular distances)
+and was built by placing a HEALPix grid over the
+sky (with different $\Nside$), taking a spatially uniform sample of
+the brightest stars, then building a spatially uniform set of quads
+from these stars.  The smallest-scale index contains quads with
+diameter $5.6$ to $8~\arcmin$, while the largest contains quads up
+to $30~\deg$.  These indices contain a total of about $85$
+million stars and $150$ million quads.
+
+% nstars=85,982,166,
+% nquads=149,011,300
+
+Of the $11,076$ images, our system correctly calibrated $11,062$ (a
+success rate above $99.8~\%$), with no false positives.  Of the $14$
+images that we failed to calibrate, we were able to calibrate one by
+preprocessing the image (taking the red channel and downsampling by a
+factor of two).  The $13$ remaining failures were all taken with a
+far-UV filter; the majority of the images combine near-UV and far-UV
+exposures.  We successfully calibrated $100~\percent$ of the images
+with near-UV coverage.
+
+\subsection{Blind astrometric calibration of other imagery}
+
+We have also had excellent success using the same system for blindly
+calibrating a wide class of other astronomical images including
+scanned photographic plates from the Harvard Observatory archives
+\citep{harvardplates}, amateur telescope shots spanning approximately
+one $\deg^2$ of the sky and even photographs from consumer
+digital SLR cameras, some of which span tens of $\deg$. These images
+have very different exposure properties, capture light in the optical,
+infrared and ultraviolet bands, and often have significant distortions
+away from the pure tangent-plane projection of an ideal camera. Part
+of the remarkable robustness of our algorithm, which allows it to
+calibrate all such images using the same parameter settings, comes
+from the fact that the hash function is scale invariant so that even
+if the center of an image and the edges have a significantly different
+pixel scale (solid angle per pixel), quads in both locations will
+match properly into the index (although our verification criterion may
+conservatively decide that a true solution with substantial distortion
+is not correct). Furthermore, no individual quad or star, either in
+the query or the index is essential to success. If we miss some
+evidence in one part of the image or the sky we have many more chances
+to find it elsewhere.
+
+\section{Discussion}
+
+We have described a system that performs astrometric
+calibration---determination of imaging pointing, orientation, and
+plate scale---blind, or without any prior information beyond the data
+in the image pixels.  This system works by using indexed asterisms to
+generate hypotheses, followed by quantitative verification of those
+hypotheses.  The system makes it possible to vet or restore the
+astrometric calibration information for astronomical images of unknown
+provenance, and images for which the astrometric calibration is lost,
+unknown, or untrsutworthy.
+
+(DWH: applications in archives, amateur data)
+
+(DWH: performance will degrade with image size, depth, quality, and
+wavelength as follows.)
+
+(DWH: this is the first step in building a complete model of the sky.)
+
+The system described here is up on the web as a web service; point
+your browser at http://astrometry.net/ to find out how to try it.
+Also all of the code is available at this URL under an open-source
+license.
+
+\acknowledgments We thank Jon Barron, Doug Finkbeiner, Chris Kochanek,
+Robert Lupton, Phil Marshall, Dave Monet, John Moustakas, and
+Christopher Stumm for comments on and contributions to the prototype
+version of the online service \An, plus our large alpha-testing team.
+We thank Leslie Groer and the University of Toronto Physics Department
+for use of their Bigmac computer cluster.  Lang, Mierle and Roweis
+were funded in part by NSERC and CRC; Hogg was funded in part by the
+National Aeronautics and Space Administration (grants NAG5-11669 and
+07-ADP07-0099) and the National Science Foundation (grant
+AST-0428465).  Blanton was funded in part by the NASA \textit{Spitzer
+Space Telescope} (grant G03-AR-30842).
+
+This project made use of public SDSS data.  Funding for the SDSS and
+SDSS-II has been provided by the Alfred P. Sloan Foundation, the
+Participating Institutions, the National Science Foundation, the
+U.S. Department of Energy, the National Aeronautics and Space
+Administration, the Japanese Monbukagakusho, the Max Planck Society,
+and the Higher Education Funding Council for England. The SDSS Web
+Site is http://www.sdss.org/.
+
+The SDSS is managed by the Astrophysical Research Consortium for the
+Participating Institutions. The Participating Institutions are the
+American Museum of Natural History, Astrophysical Institute Potsdam,
+University of Basel, University of Cambridge, Case Western Reserve
+University, University of Chicago, Drexel University, Fermilab, the
+Institute for Advanced Study, the Japan Participation Group, Johns
+Hopkins University, the Joint Institute for Nuclear Astrophysics, the
+Kavli Institute for Particle Astrophysics and Cosmology, the Korean
+Scientist Group, the Chinese Academy of Sciences (LAMOST), Los Alamos
+National Laboratory, the Max-Planck-Institute for Astronomy (MPIA),
+the Max-Planck-Institute for Astrophysics (MPA), New Mexico State
+University, Ohio State University, University of Pittsburgh,
+University of Portsmouth, Princeton University, the United States
+Naval Observatory, and the University of Washington.
+
+This research made use of the NASA Astrophysics Data System and the
+USNO Image and Catalogue Archive Service.
+
+\begin{thebibliography}{70}
+%
+\bibitem[Barron \etal(2008)]{barron}
+J.~T.~Barron, C.~Stumm, D.~W.~Hogg, D.~Lang, S.~Roweis,
+``Cleaning the USNO-B Catalog through automatic detection of optical artifacts,''
+\textit{The Astronomical Journal}
+\textbf{135}, 414--422 (2008).
+DOI:~10.1088/0004-6256/135/1/414
+%
+\bibitem[Bloom(1970)]{bloom}
+B.~H.~Bloom,
+``Space/time trade-offs in hash coding with allowable errors,''
+\textit{Communications of the ACM}
+\textbf{13:7}, 422--426 (1970).
+DOI:~10.1145/362686.362692
+%
+\bibitem[Chazelle \etal(2004)]{bloomier}
+B.~Chazelle, J.~Kilian, R.~Rubinfeld, A.~Tal,
+``The Bloomier filter: an efficient data structure for static support lookup tables,''
+\textit{SODA '04: Proceedings of the fifteenth annual ACM-SIAM Symposium on Discrete algorithms},
+30--39 (2004).
+%
+\bibitem[G{\'o}rski \etal(2005)]{healpix}
+K.~M.~G{\'o}rski, E.~Hivon, A.~J.~Banday, B.~D.~Wandelt, F.~K.~Hansen, M.~Reinecke, M.~Bartelmann,
+``HEALPix:\ A Framework for High-Resolution Discretization and Fast Analysis of Data Distributed on the Sphere,''
+\textit{The Astrophysical Journal}
+\textbf{622}, 759--771 (2005).
+DOI:~10.1086/427976
+%
+\bibitem[Harvey(2004)]{harvey}
+C.~Harvey,
+\textit{New Algorithms for Automated Astrometry},
+MSc Thesis, Computer Science, University of Toronto (2004).
+%
+\bibitem[Huttenlocher \& Ullman(1990)]{huttenlocher1990}
+D.~P.~Huttenlocher, S.~Ullman,
+``Recognizing solid objects by alignment with an image,''
+\textit{International Journal of Computer Vision}
+\textbf{5:2}, 195--212 (1990).
+%
+\bibitem[Junkins \etal(1977)]{junkins1977}
+J.~L.~Junkins, C.~C.~White, J.~D.~Turner,
+``Star pattern recognition for real time attitude determination,''
+\textit{Journal of the Astronautical Sciences}
+\textbf{25}, 251--270 (1977).
+%
+\bibitem[Lamdan \etal(1990)]{lamdan1990}
+Y.~Lamdan, J.~T.~Schwartz, H.~J.~Wolfson,
+``Affine invariant model-based object recognition,''
+\textit{IEEE Transactions on Robotics and Automation}
+\textbf{6:5}, 578--589 (1990).
+%
+\bibitem[Lang \& Mierle(2008)]{lang08}
+D.~Lang, K.~Mierle,
+``Kd-trees without the Pain, but with all the Performance,''
+\textit{in preparation} (2008).
+%
+\bibitem[Liebe(1993)]{liebe1993}
+C.~C.~Liebe,
+``Pattern recognition of star constellations for spacecraft applications,''
+\textit{IEEE Aerospace and Electronic Systems Magazine}
+\textbf{8:1}, 31--39 (1993).
+%
+\bibitem[Lowe(1999)]{sift}
+D.~G.~Lowe,
+``Object recognition from local scale-invariant features,''
+\textit{International Conference on Computer Vision},
+1150--1157 (1999).
+%
+\bibitem[Lupton \etal(2001)]{lupton}
+R.~H.~Lupton, J.~E.~Gunn, Z.~{Ivezi{\'c}}, G.~R.~Knapp, S.~Kent, N.~Yasuda,
+``The SDSS Imaging Pipelines,''
+\textit{ASP Conf.\ Ser.\ 238:\ Astronomical Data Analysis Software and Systems X.}
+(\textbf{10}) (2001).
+%
+\bibitem[Martin \etal(2005)]{galex}
+D.~C.~Martin \etal,
+``The \textsl{Galaxy Evolution Explorer:}\ A Space Ultraviolet Survey Mission,''
+\textit{The Astrophysical Journal}
+\textbf{619}, L1--L6 (2005). DOI:~10.1086/426387
+%
+\bibitem[Monet \etal(2003)]{usnob}
+D.~G.~Monet \etal,
+``The USNO-B Catalog,''
+\textit{The Astronomical Journal}
+\textbf{125}, 984--993 (2003).
+DOI:~10.1086/345888
+%
+\bibitem[P\'al \& Bakos(2006)]{palbakos}
+A.~P\'al, G.~\'A.~Bakos,
+``Astrometry in Wide-Field Surveys,''
+\textit{The Publications of the Astronomical Society of the Pacific}
+\textbf{118}, 1474--1483 (2006).
+%
+\bibitem[Simcoe \etal(2006)]{harvardplates}
+R.~J.~Simcoe, J.~E.~Grindlay, E.~J.~Los, A.~Doane, S.~G.~Laycock, D.~J.~Mink, G.~Champine, A.~Sliski,
+``An ultrahigh-speed digitizer for the Harvard College Observatory astronomical plates,'' 
+\textit{Applications of Digital Image Processing XXIX: Proceedings of SPIE}
+\textbf{6312}, 17 (2006).
+%
+\bibitem[Wolfson \& Rigoutsos(1997)]{geometrichashing} 
+H.~J.~Wolfson, I.~Rigoutsos,
+``Geometric hashing: an overview,''
+\textit{IEEE Computational Science and Engineering}
+\textbf{4:4}, 10--21 (1997).
+%
+\bibitem[York \etal(2000)]{sdss}
+D.~G.~York \etal,
+``The Sloan Digital Sky Survey:\ Technical summary,''
+\textit{The Astronomical Journal}
+\textbf{120}, 1579--1587 (2000).
+DOI:~10.1086/301513
+%
+\bibitem[Zobel \& Moffat(2006)]{invertedpaper}
+J.~Zobel, A.~Moffat,
+``Inverted Files for Text Search Engines,''
+\textit{ACM Computing Surveys}
+\textbf{38}(2), article 6 (July 2006).
+%
+\end{thebibliography}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=3in]{figs/quadfig-crop.pdf}
+\caption{Our geometric hash function converts the relative positions
+  of four stars (denoted \starA, \starB, \starC, and \starD)
+  into a 4-dimensional continuous
+  hash-code vector. The function defines a local coordinate system
+  $(x,y)$ by taking the pair of stars separated by the largest
+  distance (labelled $\starA$ and $\starB$) and placing one
+  of them (\starA) at $(x=0,y=0)$ and the other (\starB)
+  at $(x=1,y=1)$.  Within
+  that coordinate system, the positions of the remaining two stars
+  (labelled $\starC$ and $\starD$)
+  form a 4-dimensional code $(\xC,\yC,\xD,\yD)$ which
+  encodes the relative geometric arrangement of the quadruple of
+  stars, or ``quad''. By construction, this code is invariant to
+  translation, rotation and scaling of the stars in the quad.
+  \label{fig:quad}}
+\end{center}
+\end{figure}
+\vspace*{-.5in}
+
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=10cm]{figs/indexing.pdf}
+\caption{Our index of the sky begins with the USNO-B1.0 and Tycho-2
+  catalogs (A).  This figure shows the number density of stars in
+  these catalogs.  We select a bright, spatially-uniform cut of stars
+  by laying down a fine HEALPix grid and selecting the brightest $N$
+  stars in each grid cell (B).  To keep the file sizes manageable, we
+  split the index into twelve pieces corresponding to the base-level
+  HEALPixels.  There is a small margin added to each index, resulting
+  in the narrow seams in the figure which mark the HEALPixel
+  boundaries.  We build bright, spatially uniform, robust quads from
+  these stars by again laying down a fine HEALPix grid and attempting
+  to build a quad whose center of mass lies within each grid cell,
+  starting with the brightest stars, but subject to the constraint
+  that any given star can only be used in a small number of quads
+  (hence, losing one star causes us to lose only a small number of
+  quads) (C). \label{fig:indexing}}
+\end{center}
+\end{figure}
+\vspace*{-.5in}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=4.75in]{figs/fig4.png} 
+\caption{System performance and parameters can be measured by
+ aggregating information across a large number of solved images (a
+ quarter million fields from the Sloan Digital Sky Survey for this
+ figure).  Since our algorithm continues to search for a quad match
+ until it succeeds, some fields solve after we have examined only a
+ few stars while others require that we look at many stars before
+ correctly identifying them; the vast majority of images in this
+ sample solved after looking at 30 stars or less (A). In order to
+ optimize our use of computational resources, we solved the images in
+ two phases. The first phase required a detected hash code in the
+ image to match codes in the index quite closely (left vertical line
+ in B); this greatly reduces the number of matches we consider. Almost
+ all fields solved in this phase.  The second phase relaxed the
+ matching requirement substantially (right vertical line in B) which
+ solved almost all of the remaining fields, but we checked many more
+ potential matches per image.  Correspondingly, the average amount of
+ computation required per image is dramatically smaller for solving
+ the easiest $90~\%$ of fields than for the hardest $10~\%$ (C).  Once
+ we have found a candidate match, it must pass a statistical
+ verification test which, roughly speaking, computes the odds of the
+ match occurring at random. We set the cutoff for this test to one in
+ $10^9$ (a log odds of 9) but virtually all the fields solved with
+ odds of $10^{40}$ or greater (D).  \label{fig:stats}}
+\end{center}
+\end{figure} 
+
+\end{document}
