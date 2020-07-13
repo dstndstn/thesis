@@ -563,7 +563,7 @@
       \vfill
       Copyright {\copyright} {\@gradyear} by {\@author}\\
 	  % dstn
-	  \blfootnote{\@titlepagefootnote}
+	  %\blfootnote{\@titlepagefootnote}
       \vspace{.2in}
       \mbox{}
    \end{center}
