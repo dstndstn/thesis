@@ -3,7 +3,7 @@
 \section{Contributions}
 
 The \an system applies the framework of geometric hashing to the
-astronomical problem of blind astrometric calibration of images.  This
+astronomical problem of automated astrometric calibration of images.  This
 can be seen as an instance of object recognition in which the
 individual objects to be recognized---stars and galaxies---are almost
 completely indistinctive at the resolution of typical images.  The
@@ -253,7 +253,7 @@ example, we can estimate the photometric calibration and bandpass
 filter of the image, or estimate the date the image was taken.
 
 
-``Blind'' photometric calibration and bandpass estimation proceeds by
+Automated photometric calibration and bandpass estimation proceeds by
 matching stars in the image to stars in the reference catalog, and
 finding the best-fitting parameters that allow us to convert between
 ``instrumental'' fluxes in the image and magnitudes in one or several
@@ -265,7 +265,7 @@ satisfactory fit, then the bandpass of the image is likely different
 than any of those in the reference catalog.
 
 
-``Blind-dating''---calibrating the date on which an image was
+Astrometric dating---calibrating the date on which an image was
 taken---proceeds by computing the positions of reference catalog stars
 at a given date (using their tabulated proper motions) and finding the
 date when they best match those of the image stars \cite{blinddate}.

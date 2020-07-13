@@ -52,9 +52,12 @@ coordinate system.  The branch of astronomy concerned with measuring
 the positions and motions of celestial bodies is called
 \emph{astrometry}, and the task of placing a new image in a standard
 reference frame is known as 
-``calibrating the astrometry'' of the image.  The \emph{blind
-astrometric calibration} task is to calibrate an image using only the
-image itself.  The broad goal of the \an project was to build a system
+``calibrating the astrometry'' of the image.  The task of calibrating the
+astrometry of an image using only the image itself---not given a prior on the
+location---was historically known as \emph{blind astrometric calibration}.
+We recognize\footnote{Retroactively, in the year 2020}, that this is an
+ableist phrase, and instead prefer \emph{full-sky astrometric calibration}.
+The broad goal of the \an project was to build a system
 that would allow us to create correct, standards-compliant astrometric
 \metadata for every useful astronomical image ever taken, past and
 future, in any state of archival disarray.  This is part of a larger
@@ -69,13 +72,13 @@ hashing} for object recognition in images.  One of the contributions
 of this thesis is to replace the simple hash table used in traditional
 geometric hashing with a \kdtree, so I review related work in hashing
 and other approaches for fast feature matching.  Finally, I present
-the blind astrometric calibration task as an instance of object
+the astrometric calibration task as an instance of object
 recognition, and review some previous approaches to the problem.
 
 %% Our approach?
 
 
-The remaining chapters present our approach to the blind astrometric
+The remaining chapters present our approach to the astrometric
 calibration problem.  \Chapref{chap:techreport} explains our approach
 and presents the results of large-scale tests of the system on
 real-world data.  Chapters \ref{chap:verify} and \ref{chap:kdtree}
@@ -802,7 +805,7 @@ new image, and allows the positions of new sources to be described in
 a standard reference frame.
 
 
-The task of blind astrometric calibration---automatically finding the
+The task of full-sky astrometric calibration---automatically finding the
 astrometric calibration of an image, using only the information in the
 image pixels---can be seen as a pattern recognition problem.  As
 Bertin \cite{bertin2005} notes, ``astrometric and photometric
@@ -849,7 +852,7 @@ relative brightness ordering of objects in the image and the
 corresponding objects in our catalog.
 
 
-Blind astrometric calibration is an ideal task for exploring geometric
+Astrometric calibration is an ideal task for exploring geometric
 ideas in pattern recognition.  Most celestial objects are effectively
 point sources, and can be found and localized to sub-pixel accuracy
 using relatively simple image-processing procedures.  But since the
@@ -857,7 +860,7 @@ individual features are characterized only by their positions and
 brightnesses, we must examine collections of features in order to
 build distinctive patterns.  In \chapref{chap:techreport} we present
 \an, which applies the geometric hashing framework to the task of
-blind astrometric calibration.  An example of our results in shown in
+astrometric calibration.  An example of our results in shown in
 \figs \ref{fig:redgreen} and \ref{fig:onthesky}.
 
 
@@ -877,15 +880,16 @@ power consumption, and robustness (especially in avoiding false
 positives), while a high degree of accuracy is neither required nor
 possible given the hardware.
 
-\subsection{Non-blind astrometric calibration}
+\subsection{Ballpark astrometric calibration}
 
-Non-blind astrometric calibration requires that an initial estimate of
-the calibration to be provided.  Groth \cite{groth1986} presents an
-algorithm for matching two lists of coordinates (eg, image coordinates
-in pixels and reference star coordinates on the celestial sphere),
-assuming that the lists contain a significant proportion of objects in
-common.  With the limited computing resources available at the time,
-he suggests taking the brightest 20 or 30 objects in each list.
+``Ballpark'' astrometric calibration (as opposed to ``full-sky'')
+requires that an initial estimate of the calibration to be provided.
+Groth \cite{groth1986} presents an algorithm for matching two lists of
+coordinates (eg, image coordinates in pixels and reference star
+coordinates on the celestial sphere), assuming that the lists contain
+a significant proportion of objects in common.  With the limited
+computing resources available at the time, he suggests taking the
+brightest 20 or 30 objects in each list.
 
 
 Once the two lists of objects have been compiled and the brightest
@@ -996,10 +1000,10 @@ between points across the two lists.  This is a standard (generalized)
 Hough transform.
 
 
-\subsection{Blind astrometric calibration}
+\subsection{Full-sky astrometric calibration}
 
 
-The majority of previous work on blind astrometric calibration is
+The majority of previous work on full-sky astrometric calibration is
 motivated by the problem of spacecraft attitude estimation.  Sometimes
 called the ``lost in space'' or ``stellar gyroscope'' problem, the
 task is to estimate the pose of a spacecraft by using an image of the
@@ -1222,10 +1226,10 @@ locating the image on the sky---is ideal for a geometric hashing-based
 approach.  Geometric hashing (or more generally, geometric feature
 matching) is a widely-applicable technique for problems in which it is
 desirable to build distinctive geometric features out of simple
-interest-point features.  The approach is ideally suited to the blind
+interest-point features.  The approach is ideally suited to the
 astrometric calibration problem, since images of celestial objects can
 be localized to sub-pixel accuracy but have few other distinguishing
-features.  Indeed, much of the previous work in blind and non-blind
+features.  Indeed, much of the previous work in ``full-sky'' and ``ballpark''
 astrometric calibration can be placed within a geometric feature
 matching framework.
 
