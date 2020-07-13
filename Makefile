@@ -44,14 +44,21 @@ kdfigs.tex: $(addsuffix .tex,$(addprefix figs-kdtree/, \
 KDTREE_TIKZ_FIGS := pointerless-fig.pdf permute-fig.pdf apply-perm-fig.pdf \
 	r-only-fig.pdf transpose-fig.pdf bitpack-fig.pdf
 
-$(KDTREE_TIKZ_FIGS):: %.pdf: %.tex tikzfig.tex kdfigs.tex
-	pdflatex $<
+KDTREE_TIKZ_FIGS_2 := $(addprefix figs-kdtree/,$(KDTREE_TIKZ_FIGS))
+
+$(KDTREE_TIKZ_FIGS_2):: %.pdf: %.tex tikzfig.tex kdfigs.tex
+	cd figs-kdtree && pdflatex $(shell basename $<)
+
+#$(KDTREE_TIKZ_FIGS):: %.pdf: %.tex tikzfig.tex kdfigs.tex
+#	pdflatex $<
+
+
 
 KDFIGS := kdtree-bbox kdtree-split mindist-bbox mindist-split
 
 KD_FIGS := $(addsuffix .pdf,$(addprefix figs-kdtree/,$(KDFIGS)))
 
-KDTREE_FIGS := $(KD_FIGS) $(addprefix figs-kdtree/,$(KDTREE_TIKZ_FIGS))
+KDTREE_FIGS := $(KD_FIGS) $(KDTREE_TIKZ_FIGS_2)
 
 PDFLATEX = pdflatex
 BIBTEX = bibtex
